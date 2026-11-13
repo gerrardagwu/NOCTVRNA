@@ -1,0 +1,94 @@
+/* Sizes are in design pixels times --cu, so the whole timer scales as one piece. */
+.row {
+  --cu: 1px;
+  display: flex;
+  align-items: center;
+  gap: calc(24 * var(--cu));
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(4 * var(--cu));
+}
+
+.pair {
+  display: flex;
+  gap: calc(4 * var(--cu));
+}
+
+.label {
+  font-family: var(--font-bunch), sans-serif;
+  font-size: max(11px, calc(16 * var(--cu)));
+  letter-spacing: -0.05em;
+  line-height: calc(22 * var(--cu));
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.card {
+  position: relative;
+  display: block;
+  width: calc(60 * var(--cu));
+  height: calc(70 * var(--cu));
+  perspective: calc(260 * var(--cu));
+}
+
+.half {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background-position: center;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  font-family: var(--font-anton), sans-serif;
+  font-size: calc(40 * var(--cu));
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: var(--brand);
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+
+.top {
+  clip-path: inset(0 0 50% 0);
+}
+
+.bottom {
+  clip-path: inset(50% 0 0 0);
+}
+
+.flap {
+  position: absolute;
+  inset: 0;
+  display: block;
+  transform-style: preserve-3d;
+  transform-origin: 50% 50%;
+}
+
+.front,
+.back {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.front {
+  clip-path: inset(50% 0 0 0);
+}
+
+.back {
+  clip-path: inset(0 0 50% 0);
+  transform: rotateX(180deg);
+}
+
+.shade {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  mask-size: 100% 100%;
+  -webkit-mask-size: 100% 100%;
+  pointer-events: none;
+}

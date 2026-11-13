@@ -1,0 +1,234 @@
+/*
+  The hero composition is the Figma frame (1440 x 735) scaled as one piece: every size and position
+  is design pixels times --u. The logo, owl, caption and countdown sit in a fixed layer so the logo
+  and countdown can be scrubbed straight into the sticky header.
+*/
+.root {
+  position: relative;
+}
+
+.layer {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: var(--hero-h);
+  z-index: 50;
+  pointer-events: none;
+}
+
+.bar {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: var(--header-h);
+  background: rgb(9 9 9 / 0.92);
+  border-bottom: 0.5px solid var(--deep);
+  opacity: 0;
+  visibility: hidden;
+}
+
+.stage {
+  --u: min(calc(100vw / 1440), calc(var(--hero-h) / 735));
+  position: absolute;
+  left: calc(50% - 720 * var(--u));
+  top: calc(50% - 367.5 * var(--u));
+  width: calc(1440 * var(--u));
+  height: calc(735 * var(--u));
+}
+
+.owl {
+  position: absolute;
+  left: calc(50% - 44 * var(--u));
+  top: calc(32 * var(--u));
+  width: calc(88 * var(--u));
+  height: calc(88 * var(--u));
+}
+
+.owlInner,
+.owlInner img {
+  width: 100%;
+  height: 100%;
+}
+
+.logo {
+  position: absolute;
+  left: calc(50% - 465 * var(--u));
+  top: calc(100 * var(--u));
+  width: calc(931 * var(--u));
+  height: calc(343 * var(--u));
+  display: block;
+  transform-origin: 0 0;
+  pointer-events: auto;
+  will-change: transform;
+}
+
+.logoInner {
+  --b: 0.04;
+  --g: 0;
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.logoImg {
+  object-fit: contain;
+  filter: brightness(var(--b));
+}
+
+/* The same artwork, blurred, is the light the letters throw. */
+.glow {
+  object-fit: contain;
+  filter: blur(calc(34 * var(--u))) saturate(1.5);
+  opacity: var(--g);
+  transform: scale(1.03);
+}
+
+.caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(371 * var(--u));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(2 * var(--u));
+  text-align: center;
+  white-space: nowrap;
+}
+
+.lagos {
+  font-family: var(--font-anton), sans-serif;
+  font-size: calc(32 * var(--u));
+  letter-spacing: -0.04em;
+  line-height: normal;
+  color: var(--green);
+}
+
+.after {
+  font-family: var(--font-dm), sans-serif;
+  font-size: calc(20 * var(--u));
+  letter-spacing: -0.05em;
+  line-height: normal;
+  color: #fff;
+}
+
+.cdTitle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(548 * var(--u));
+  text-align: center;
+  font-family: var(--font-bunch), sans-serif;
+  font-weight: 700;
+  font-size: calc(24 * var(--u));
+  letter-spacing: -0.05em;
+  line-height: calc(34 * var(--u));
+  color: var(--ink);
+  white-space: pre;
+}
+
+.cdWrap {
+  position: absolute;
+  left: calc(50% - 210 * var(--u));
+  top: calc(598 * var(--u));
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.cdWrap > * {
+  --cu: var(--u);
+}
+
+.hero {
+  position: relative;
+  height: var(--hero-h);
+  overflow: hidden;
+  background: var(--black);
+}
+
+.bg,
+.bgInner {
+  position: absolute;
+  inset: 0;
+}
+
+.bgInner {
+  opacity: 0;
+  transform: scale(1.08);
+}
+
+.bgImg {
+  object-fit: cover;
+}
+
+/* From the design: 80% black over the top two thirds, opening up to the city at the bottom. */
+.bgShade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgb(0 0 0 / 0.8) 65.51%, rgb(0 0 0 / 0));
+}
+
+@media (max-width: 760px) {
+  .stage {
+    --u: calc(100vw / 1000);
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .owl {
+    top: 12%;
+    left: calc(50% - 32px);
+    width: 64px;
+    height: 64px;
+  }
+
+  .logo {
+    top: calc(12% + 84px);
+    left: 4vw;
+    width: 92vw;
+    height: calc(92vw / 2.714);
+  }
+
+  .caption {
+    top: calc(12% + 92px + 33.9vw);
+    gap: 4px;
+  }
+
+  .lagos {
+    font-size: 26px;
+  }
+
+  .after {
+    font-size: 15px;
+  }
+
+  .cdTitle {
+    top: auto;
+    bottom: calc(13% + 92px);
+    font-size: 18px;
+    line-height: 26px;
+  }
+
+  .cdWrap {
+    --cdu: calc(100vw / 640);
+    top: auto;
+    bottom: 13%;
+    left: calc(50% - 210 * var(--cdu));
+  }
+
+  .cdWrap > * {
+    --cu: var(--cdu);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logoInner {
+    --b: 1;
+    --g: 0.55;
+  }
+
+  .bgInner {
+    opacity: 1;
+    transform: none;
+  }
+}

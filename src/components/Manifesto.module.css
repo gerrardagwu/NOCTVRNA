@@ -1,0 +1,85 @@
+.section {
+  position: relative;
+  background: var(--night);
+  padding-top: 112px;
+  padding-bottom: 112px;
+  padding-left: max(24px, env(safe-area-inset-left, 0px));
+  padding-right: max(24px, env(safe-area-inset-right, 0px));
+}
+
+/* Columns from the frame: heading 350 wide at x 179, copy 644 wide at x 616. */
+.inner {
+  display: grid;
+  grid-template-columns: minmax(0, 350px) minmax(0, 644px);
+  column-gap: 87px;
+  justify-content: center;
+  align-items: start;
+  transform-origin: 50% 100%;
+}
+
+.heading {
+  position: sticky;
+  top: calc(var(--header-h) + 48px);
+  font-family: var(--font-anton), sans-serif;
+  font-weight: 400;
+  font-size: 56px;
+  line-height: 60px;
+  letter-spacing: -0.04em;
+  color: var(--brand-soft);
+  text-wrap: balance;
+}
+
+/* Extra room under the copy so the heading holds still long enough to read as pinned. */
+.copy {
+  min-width: 0;
+  padding-bottom: 28vh;
+}
+
+.lead {
+  font-size: 32px;
+  line-height: 1.22;
+  letter-spacing: -0.04em;
+  color: #fff;
+}
+
+.hl {
+  color: var(--brand);
+}
+
+.body {
+  margin-top: 32px;
+  display: grid;
+  gap: 28px;
+  font-size: 18px;
+  line-height: 28px;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+}
+
+@media (max-width: 900px) {
+  .inner {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 40px;
+    max-width: 644px;
+    margin-inline: auto;
+  }
+
+  .heading {
+    position: static;
+    font-size: 44px;
+    line-height: 48px;
+  }
+
+  .lead {
+    font-size: 24px;
+  }
+
+  .body {
+    font-size: 16px;
+    line-height: 26px;
+  }
+
+  .copy {
+    padding-bottom: 12vh;
+  }
+}

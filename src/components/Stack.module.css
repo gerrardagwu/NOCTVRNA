@@ -1,0 +1,340 @@
+/* One pinned, full-screen stage. Scenes are stacked; later scenes slide up over earlier ones. */
+.stack {
+  position: relative;
+  height: 100svh;
+  overflow: hidden;
+  background: var(--loader);
+}
+
+.panel {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* GSAP parks these one screen down (yPercent: 100) and slides them up; no CSS transform here,
+   or the two offsets would add up. */
+.values,
+.enter {
+  box-shadow: 0 -40px 80px rgb(0 0 0 / 0.55);
+}
+
+/* ---------- The city never really sleeps (Figma "Frame 3", 1440 x 1042) ---------- */
+.city {
+  z-index: 1;
+  background: var(--night);
+}
+
+.cityInner {
+  --u: min(calc(100vw / 1440), calc((100svh - var(--header-h)) / 900));
+  position: absolute;
+  inset: var(--header-h) 0 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(83 * var(--u));
+  perspective: 1200px;
+}
+
+.headline {
+  width: min(calc(1102 * var(--u)), calc(100% - 48px));
+  font-family: var(--font-anton), sans-serif;
+  font-weight: 400;
+  font-size: calc(56 * var(--u));
+  line-height: calc(60 * var(--u));
+  letter-spacing: -0.04em;
+  text-align: center;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.hl {
+  color: var(--brand);
+}
+
+.posterArea {
+  position: relative;
+  width: calc(458 * var(--u));
+  height: calc(537 * var(--u));
+  max-width: 100%;
+}
+
+.poster {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  box-shadow: 0 calc(4 * var(--u)) calc(50 * var(--u)) rgb(232 182 249 / 0.25);
+  transform-origin: 50% 100%;
+}
+
+.poster img {
+  object-fit: cover;
+}
+
+/* "THE NIGHT" and "IS CALLING" sit just behind the poster's edges, 170 design px either side of centre. */
+.night {
+  position: absolute;
+  top: calc(199 * var(--u));
+  z-index: 0;
+  font-family: var(--font-neuvorte), serif;
+  font-size: calc(70 * var(--u));
+  line-height: 1.43;
+  letter-spacing: -0.04em;
+  color: var(--neon);
+  white-space: nowrap;
+}
+
+.night > span {
+  display: inline-block;
+}
+
+.nightLeft {
+  right: calc(50% + 170 * var(--u));
+}
+
+.nightRight {
+  left: calc(50% + 170 * var(--u));
+}
+
+/* ---------- Values (Figma "Frame 10") ---------- */
+.values {
+  z-index: 2;
+  background: var(--night);
+}
+
+.valuesInner {
+  --u: min(calc(100vw / 1440), calc((100svh - var(--header-h)) / 640));
+  position: absolute;
+  inset: var(--header-h) 0 0 0;
+  display: grid;
+  place-items: center;
+}
+
+.value {
+  grid-area: 1 / 1;
+  width: min(calc(1076 * var(--u)), calc(100% - 48px));
+  font-size: calc(40 * var(--u));
+  line-height: calc(60 * var(--u));
+  letter-spacing: -0.04em;
+  color: var(--mute);
+}
+
+.valueTitle {
+  font-family: var(--font-anton), sans-serif;
+  font-size: calc(70 * var(--u));
+  letter-spacing: 0;
+  color: var(--ink);
+}
+
+/* ---------- Enter a different state of night (Figma "Frame 9") ---------- */
+.enter {
+  z-index: 3;
+  background: var(--void);
+}
+
+.glow {
+  --u: min(calc(100vw / 1440), calc(100svh / 951));
+  position: absolute;
+  left: calc(50% - 400 * var(--u));
+  top: calc(50% - 454 * var(--u));
+  width: calc(800 * var(--u));
+  height: calc(800 * var(--u));
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgb(237 193 252 / 0.3) 0%,
+    rgb(237 193 252 / 0.1) 38%,
+    rgb(237 193 252 / 0) 70%
+  );
+  filter: blur(10px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.enterInner {
+  --u: min(calc(100vw / 1440), calc(100svh / 951));
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(40 * var(--u));
+  padding: var(--header-h) 24px 24px;
+}
+
+.enterTitle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: var(--font-anton), sans-serif;
+  font-weight: 400;
+  font-size: calc(150 * var(--u));
+  line-height: calc(138.5 * var(--u));
+  letter-spacing: -0.05em;
+  text-align: center;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.lineMask {
+  display: block;
+  overflow: hidden;
+  padding-top: 0.06em;
+  margin-top: -0.06em;
+}
+
+.line {
+  display: block;
+}
+
+.lineBrand {
+  color: var(--brand);
+}
+
+.enterRest {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(40 * var(--u));
+}
+
+.enterCopy {
+  max-width: 644px;
+  font-size: max(16px, calc(24 * var(--u)));
+  line-height: 1.17;
+  letter-spacing: -0.04em;
+  text-align: center;
+  color: var(--ink);
+}
+
+.form {
+  display: flex;
+  align-items: flex-end;
+  gap: 40px;
+}
+
+.fields {
+  display: flex;
+  gap: 40px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 18px;
+  letter-spacing: -0.04em;
+  color: var(--mute);
+}
+
+.field input {
+  width: 280px;
+  padding: 12px 0;
+  border: 0;
+  border-bottom: 1px solid var(--brand);
+  border-radius: 0;
+  background: transparent;
+  font-size: 18px;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  transition: border-color 0.3s var(--ease-out);
+}
+
+.field input::placeholder {
+  color: var(--mute);
+}
+
+.field input:focus {
+  outline: none;
+  border-bottom-color: var(--green);
+}
+
+.button {
+  padding: 18px 20px;
+  border: 0;
+  border-radius: 0;
+  background: var(--green);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.06em;
+  color: #000;
+  cursor: pointer;
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgb(85 255 0 / 0.3);
+}
+
+.formMsg {
+  min-height: 1.4em;
+  margin-top: -16px;
+  font-size: 15px;
+  color: var(--green);
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .cityInner {
+    --u: min(calc(100vw / 620), calc((100svh - var(--header-h)) / 1000));
+    gap: 56px;
+  }
+
+  .headline {
+    font-size: 26px;
+    line-height: 29px;
+  }
+
+  .night {
+    z-index: 2;
+    top: auto;
+    font-size: 34px;
+    line-height: 1.2;
+  }
+
+  .nightLeft {
+    right: auto;
+    left: -12%;
+    bottom: calc(100% - 20px);
+  }
+
+  .nightRight {
+    left: auto;
+    right: -12%;
+    top: calc(100% - 20px);
+  }
+
+  .valuesInner {
+    --u: min(calc(100vw / 720), calc((100svh - var(--header-h)) / 700));
+  }
+
+  .enterInner {
+    --u: min(calc(100vw / 860), calc(100svh / 1100));
+    gap: 28px;
+  }
+
+  .enterRest {
+    gap: 24px;
+    width: 100%;
+  }
+
+  .form,
+  .fields {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .field input {
+    width: 100%;
+  }
+
+  .formMsg {
+    margin-top: -8px;
+  }
+}

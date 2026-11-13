@@ -1,0 +1,110 @@
+/* Tokens taken from the Figma file (styles: brand, second, white) plus the section fills it uses. */
+:root {
+  --black: #000000;
+  --loader: #050505;
+  --void: #090909;
+  --night: #0e0b12;
+  --ink: #f5f1e5;
+  --ink-soft: #e9e6df;
+  --brand: #c38bef;
+  --brand-soft: #edc1fc;
+  --deep: #340857;
+  --green: #55ff00;
+  --neon: #10f707;
+  --mute: #5d5d5d;
+  --mute-2: #77736d;
+
+  --header-h: 76px;
+  --strip-h: 86px;
+  --hero-h: max(560px, calc(100svh - var(--strip-h)));
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 760px) {
+  :root {
+    --header-h: 60px;
+    --strip-h: 64px;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background: var(--black);
+  color-scheme: dark;
+}
+
+body {
+  background: var(--night);
+  color: var(--ink);
+  font-family: var(--font-bunch), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+p,
+h1,
+h2,
+h3 {
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+::selection {
+  background: var(--brand);
+  color: var(--deep);
+}
+
+:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Elements the hero intro reveals start hidden; the <noscript> rule in layout.tsx undoes this. */
+[data-intro] {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-intro] {
+    opacity: 1;
+  }
+}
