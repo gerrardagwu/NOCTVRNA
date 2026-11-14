@@ -64,6 +64,12 @@ export default function Stack() {
           .from(layer.querySelector("[data-vtag]"), { scale: 0, rotate: -35, duration: 0.5, ease: "expo.out" }, 0.3)
           .from(layer.querySelector("[data-vbody]"), { y: 30, opacity: 0, duration: 0.5, ease: "power2.out" }, 0.35);
 
+      // Each value's photo settles from a slow push-in while its scene arrives.
+      const settle = (layer: Element) => {
+        const photo = layer.querySelector("[data-vphoto]");
+        return photo ? gsap.fromTo(photo, { scale: 1.18 }, { scale: 1, duration: 1.6, ease: "power2.out" }) : gsap.timeline();
+      };
+
       const mm = gsap.matchMedia();
       mm.add({ mobile: "(max-width: 760px)", desktop: "(min-width: 761px)" }, (ctx) => {
         const mobile = ctx.conditions?.mobile;
@@ -123,14 +129,17 @@ export default function Stack() {
           // Values: Originality floods up over the city...
           .fromTo(q("[data-panel=values]"), { yPercent: 100 }, { yPercent: 0, duration: 1, ease: "power2.inOut" }, T.values)
           .to(q("[data-panel=city] [data-inner]"), { scale: 0.88, opacity: 0.2, duration: 1, ease: "power2.inOut" }, T.values)
+          .add(settle(layers[0]), T.values)
           .add(reveal(layers[0]), T.values + 0.45)
 
           // ...Freedom of Expression wipes out of the sticker...
           .fromTo(layers[1], { clipPath: WIPE_FROM }, { clipPath: WIPE_TO, duration: 1, ease: "power2.inOut" }, T.freedom)
+          .add(settle(layers[1]), T.freedom)
           .add(reveal(layers[1]), T.freedom + 0.35)
 
           // ...then Intentional Curation.
           .fromTo(layers[2], { clipPath: WIPE_FROM }, { clipPath: WIPE_TO, duration: 1, ease: "power2.inOut" }, T.curation)
+          .add(settle(layers[2]), T.curation)
           .add(reveal(layers[2]), T.curation + 0.35)
 
           // The sign-up scene covers the values.

@@ -32,7 +32,7 @@
 }
 
 .cityInner {
-  --u: min(calc(100vw / 1440), calc((100svh - var(--header-h)) / 900));
+  --u: min(calc(100vw / 1440), calc((100svh - var(--header-h)) / 990));
   position: absolute;
   inset: var(--header-h) 0 0 0;
   display: flex;
@@ -43,13 +43,15 @@
   perspective: 1200px;
 }
 
+/* Same tracking and leading as the other big Anton headings, and the same 6vw content edges, so it
+   reads as one of them rather than a squeezed paragraph. */
 .headline {
-  width: min(calc(1102 * var(--u)), calc(100% - 48px));
+  width: min(1240px, calc(100% - max(48px, 12vw)));
   font-family: var(--font-anton), sans-serif;
   font-weight: 400;
-  font-size: calc(56 * var(--u));
-  line-height: calc(60 * var(--u));
-  letter-spacing: -0.04em;
+  font-size: clamp(32px, min(4.6vw, 7.6svh), 78px);
+  line-height: 1;
+  letter-spacing: -0.02em;
   text-align: center;
   color: var(--ink);
   text-wrap: balance;
@@ -290,8 +292,7 @@
   }
 
   .headline {
-    font-size: 26px;
-    line-height: 29px;
+    font-size: clamp(28px, 8.2vw, 36px);
   }
 
   .night {

@@ -176,9 +176,36 @@
   user-select: none;
 }
 
+/* Photos bleed a little past the card so the cursor parallax never shows an edge. */
+.photos {
+  position: absolute;
+  inset: -16px;
+}
+
+.photo {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.photo img {
+  object-fit: cover;
+}
+
+/* A light vignette top and bottom so the white sticker edges read against bright photos. */
+.shade {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(180deg, rgb(8 7 14 / 0.4) 0%, rgb(8 7 14 / 0) 28%, rgb(8 7 14 / 0) 60%, rgb(8 7 14 / 0.55) 100%);
+  pointer-events: none;
+}
+
 .scene {
   position: absolute;
   inset: 0;
+  z-index: 3;
 }
 
 /* Each sticker is four nested layers so the motions never fight:

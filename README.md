@@ -69,5 +69,10 @@ All motion respects `prefers-reduced-motion`.
 
 ## Assets
 
-Everything in `public/images` was exported from the Figma file: hero background, logo, owl badge, strip owl,
-loader owl, poster, and the six flip-card shapes (`flip-1.svg` to `flip-6.svg`).
+Everything in `public/images` except the photos was exported from the Figma file: hero background, logo, owl badge,
+strip owl, loader owl, poster, and the six flip-card shapes (`flip-1.svg` to `flip-6.svg`).
+
+Photos: `exp-sound.jpg`, `exp-people.jpg`, `exp-atmosphere.jpg` (Experience stage), `value-originality.jpg` (the
+bridge poster with its title, logo and carousel marks retouched out) and `value-freedom.jpg` (app icons cropped off).
+Intentional Curation has no photo yet; add one to `VALUES` in `src/components/Values.tsx` and it switches from the
+lilac background to the photo automatically.

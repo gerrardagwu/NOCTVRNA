@@ -1,7 +1,6 @@
 /*
-  Our philosophy. Three full-screen colour floods from the brand palette, like the lighting changing
-  between sets: deep purple, then acid green, then lilac. Big hopping letters, a spinning owl sticker,
-  a tilted tag.
+  Our philosophy, one value per screen. Each one is a full-bleed photo (or, until a photo is added, a
+  flood of brand colour) with big hopping letters, a spinning owl sticker and a tilted tag.
 */
 .layers {
   position: absolute;
@@ -14,6 +13,8 @@
   --text: #e9d8f6;
   --tag-bg: var(--green);
   --tag-fg: var(--night);
+  --sticker-bg: var(--fg);
+  --sticker-ink: var(--bg);
   --ring: var(--green);
   position: absolute;
   inset: 0;
@@ -22,31 +23,68 @@
   color: var(--text);
 }
 
+/* Originality: the green bridge at night. */
 .v1 {
-  --bg: var(--deep);
+  --bg: #050806;
   --fg: var(--brand-soft);
-  --text: #e9d8f6;
+  --text: #ece6f2;
   --tag-bg: var(--green);
   --tag-fg: var(--night);
-  --ring: var(--green);
+  --sticker-bg: var(--green);
+  --sticker-ink: var(--night);
+  --ring: var(--night);
 }
 
+/* Freedom of Expression: friends mid-laugh on the floor. */
 .v2 {
-  --bg: var(--green);
-  --fg: var(--night);
-  --text: #12200b;
-  --tag-bg: var(--deep);
-  --tag-fg: var(--brand-soft);
+  --bg: #0d0806;
+  --fg: var(--ink);
+  --text: #f1e9de;
+  --tag-bg: var(--brand);
+  --tag-fg: var(--deep);
+  --sticker-bg: var(--brand);
+  --sticker-ink: var(--deep);
   --ring: var(--deep);
 }
 
+/* Intentional Curation: lilac flood until its photo arrives. */
 .v3 {
   --bg: var(--brand);
   --fg: #1d0533;
   --text: #2a0b47;
   --tag-bg: var(--night);
   --tag-fg: var(--green);
+  --sticker-bg: #1d0533;
+  --sticker-ink: var(--brand);
   --ring: var(--deep);
+}
+
+/* Photo bleeds past the edges so the cursor drift never shows a seam. */
+.photo {
+  position: absolute;
+  inset: -24px;
+}
+
+.photoZoom {
+  position: absolute;
+  inset: 0;
+}
+
+.photoZoom img {
+  object-fit: cover;
+}
+
+/* Darker where the words sit: left for the title, bottom for the copy. */
+.scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(0deg, rgb(9 6 14 / 0.85) 0%, rgb(9 6 14 / 0.2) 42%, rgb(9 6 14 / 0) 60%),
+    linear-gradient(90deg, rgb(9 6 14 / 0.72) 0%, rgb(9 6 14 / 0.3) 55%, rgb(9 6 14 / 0.42) 100%);
+}
+
+.hasPhoto .title {
+  text-shadow: 0 4px 40px rgb(9 6 14 / 0.45);
 }
 
 .grid {
@@ -179,7 +217,7 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: var(--fg);
+  background: var(--sticker-bg);
   box-shadow: 0 20px 50px -20px rgb(0 0 0 / 0.55);
   cursor: pointer;
 }
@@ -193,7 +231,7 @@
 }
 
 .ring text {
-  fill: var(--bg);
+  fill: var(--sticker-ink);
   font-family: var(--font-anton), sans-serif;
   font-size: 19px;
   letter-spacing: 0.06em;

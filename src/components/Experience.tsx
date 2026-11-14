@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useImperativeHandle, useRef, useState, type KeyboardEvent, type ReactNode, type Ref } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { Bolt, Burst, COLORS, DiscoBall, Note, PhoneHand, RockHand, Sparkle, Speaker, Vinyl } from "./Stickers";
@@ -10,31 +11,39 @@ type Kind = "vinyl" | "speaker" | "note" | "rock" | "phone" | "burst" | "ball" |
 /** A sticker on the stage: centre (x, y) and max width/height in % of the stage, its art's aspect ratio, tilt and parallax depth. */
 type Slot = { kind: Kind; x: number; y: number; w: number; h: number; ar: number; rot: number; depth: number; art: ReactNode };
 
+/** Photo behind each scene; `focus` is the object-position that keeps the people in frame. */
+const PHOTOS = [
+  { src: "/images/exp-sound.jpg", focus: "50% 72%", alt: "A woman dancing with her arm up under blue club lights" },
+  { src: "/images/exp-people.jpg", focus: "50% 40%", alt: "A packed crowd with hands in the air under pink and red lights" },
+  { src: "/images/exp-atmosphere.jpg", focus: "50% 45%", alt: "Orange and blue stage lights over a crowd, one hand raised" },
+];
+
+/* Stickers sit round the edges of each photo so the people stay the centre of it. */
 const SCENES: Slot[][] = [
   // Sound: a record sliding out of its sleeve, a speaker, notes in the air.
   [
-    { kind: "vinyl", x: 40, y: 55, w: 58, h: 56, ar: 1.45, rot: -6, depth: 1, art: <Vinyl /> },
-    { kind: "speaker", x: 82, y: 60, w: 24, h: 50, ar: 0.905, rot: 8, depth: 1.6, art: <Speaker /> },
-    { kind: "note", x: 70, y: 19, w: 10, h: 18, ar: 0.75, rot: 12, depth: 2.4, art: <Note /> },
-    { kind: "note", x: 17, y: 20, w: 9, h: 16, ar: 0.75, rot: -14, depth: 2.2, art: <Note color={COLORS.LILAC} /> },
-    { kind: "sparkle", x: 91, y: 23, w: 7, h: 9, ar: 1, rot: 0, depth: 3, art: <Sparkle /> },
+    { kind: "vinyl", x: 24, y: 81, w: 38, h: 34, ar: 1.45, rot: -8, depth: 1, art: <Vinyl /> },
+    { kind: "speaker", x: 86, y: 76, w: 17, h: 34, ar: 0.905, rot: 9, depth: 1.6, art: <Speaker /> },
+    { kind: "note", x: 84, y: 17, w: 9, h: 16, ar: 0.75, rot: 12, depth: 2.4, art: <Note /> },
+    { kind: "note", x: 13, y: 20, w: 8, h: 15, ar: 0.75, rot: -14, depth: 2.2, art: <Note color={COLORS.LILAC} /> },
+    { kind: "sparkle", x: 71, y: 10, w: 6, h: 8, ar: 1, rot: 0, depth: 3, art: <Sparkle /> },
   ],
   // People: hands up, phones out.
   [
-    { kind: "rock", x: 30, y: 58, w: 30, h: 64, ar: 0.68, rot: -12, depth: 1.2, art: <RockHand /> },
-    { kind: "phone", x: 70, y: 55, w: 30, h: 64, ar: 0.73, rot: 10, depth: 1.5, art: <PhoneHand /> },
-    { kind: "burst", x: 51, y: 18, w: 20, h: 24, ar: 1, rot: -8, depth: 2.4, art: <Burst /> },
-    { kind: "sparkle", x: 13, y: 22, w: 7, h: 9, ar: 1, rot: 0, depth: 3, art: <Sparkle color={COLORS.PAPER} /> },
-    { kind: "sparkle", x: 89, y: 84, w: 7, h: 9, ar: 1, rot: 0, depth: 2.8, art: <Sparkle color={COLORS.GREEN} /> },
+    { kind: "rock", x: 14, y: 76, w: 21, h: 44, ar: 0.68, rot: -12, depth: 1.2, art: <RockHand /> },
+    { kind: "phone", x: 86, y: 74, w: 21, h: 44, ar: 0.73, rot: 10, depth: 1.5, art: <PhoneHand /> },
+    { kind: "burst", x: 84, y: 16, w: 16, h: 20, ar: 1, rot: -8, depth: 2.4, art: <Burst /> },
+    { kind: "sparkle", x: 12, y: 16, w: 6, h: 8, ar: 1, rot: 0, depth: 3, art: <Sparkle color={COLORS.PAPER} /> },
+    { kind: "sparkle", x: 66, y: 90, w: 6, h: 8, ar: 1, rot: 0, depth: 2.8, art: <Sparkle color={COLORS.GREEN} /> },
   ],
   // Atmosphere: a mirror ball, lightning, glints.
   [
-    { kind: "ball", x: 50, y: 45, w: 36, h: 64, ar: 0.833, rot: 0, depth: 1, art: <DiscoBall /> },
-    { kind: "bolt", x: 17, y: 60, w: 13, h: 34, ar: 0.579, rot: -16, depth: 2, art: <Bolt /> },
-    { kind: "bolt", x: 84, y: 64, w: 11, h: 30, ar: 0.579, rot: 18, depth: 2.2, art: <Bolt color={COLORS.CORAL} /> },
-    { kind: "sparkle", x: 28, y: 20, w: 7, h: 9, ar: 1, rot: 0, depth: 3, art: <Sparkle /> },
-    { kind: "sparkle", x: 75, y: 17, w: 6, h: 8, ar: 1, rot: 0, depth: 2.6, art: <Sparkle color={COLORS.PAPER} /> },
-    { kind: "sparkle", x: 62, y: 87, w: 6, h: 8, ar: 1, rot: 0, depth: 2.4, art: <Sparkle color={COLORS.LILAC} /> },
+    { kind: "ball", x: 83, y: 23, w: 21, h: 38, ar: 0.833, rot: 6, depth: 1, art: <DiscoBall /> },
+    { kind: "bolt", x: 12, y: 70, w: 10, h: 26, ar: 0.579, rot: -16, depth: 2, art: <Bolt /> },
+    { kind: "bolt", x: 89, y: 80, w: 9, h: 24, ar: 0.579, rot: 18, depth: 2.2, art: <Bolt color={COLORS.CORAL} /> },
+    { kind: "sparkle", x: 15, y: 18, w: 6, h: 8, ar: 1, rot: 0, depth: 3, art: <Sparkle /> },
+    { kind: "sparkle", x: 62, y: 12, w: 5, h: 7, ar: 1, rot: 0, depth: 2.6, art: <Sparkle color={COLORS.PAPER} /> },
+    { kind: "sparkle", x: 40, y: 90, w: 5, h: 7, ar: 1, rot: 0, depth: 2.4, art: <Sparkle color={COLORS.LILAC} /> },
   ],
 ];
 
@@ -106,7 +115,7 @@ function react(kind: Kind, pop: HTMLElement, idle: Map<string, gsap.core.Tween>)
   }
 }
 
-/** Sound. People. Atmosphere. Pick a word (or keep scrolling) and the sticker sheet on the right changes; poke the stickers to play. */
+/** Sound. People. Atmosphere. Pick a word (or keep scrolling) and the photo and stickers on the right change; poke the stickers to play. */
 export default function Experience({ ref }: { ref?: Ref<ExperienceHandle> }) {
   const [mode, setMode] = useState(0);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -150,8 +159,10 @@ export default function Experience({ ref }: { ref?: Ref<ExperienceHandle> }) {
         const d = Number(el.dataset.drift);
         gsap.to(el, { x: px * d * 18, y: py * d * 14, duration: 0.9, ease: "power3.out", overwrite: "auto" });
       });
+      // The photo leans the other way, a little, for depth.
+      gsap.to(q("[data-photo-pan]"), { x: px * -14, y: py * -10, duration: 1.1, ease: "power3.out", overwrite: "auto" });
     };
-    const onLeave = () => gsap.to(q("[data-drift]"), { x: 0, y: 0, duration: 1, ease: "power3.out", overwrite: "auto" });
+    const onLeave = () => gsap.to(q("[data-drift], [data-photo-pan]"), { x: 0, y: 0, duration: 1, ease: "power3.out", overwrite: "auto" });
     const onDown = (e: PointerEvent) => {
       const pop = (e.target as Element).closest<HTMLElement>("[data-pop]");
       if (!pop || reduce) return;
@@ -170,11 +181,23 @@ export default function Experience({ ref }: { ref?: Ref<ExperienceHandle> }) {
     };
   }, []);
 
-  // Scene change: the old stickers peel away, the new ones slap on one after another.
+  // Scene change: the new photo fades up over the old one with a slow push-in; the old stickers peel
+  // away and the new ones slap on one after another.
   useEffect(() => {
     const scenes = stageRef.current!.querySelectorAll<HTMLElement>("[data-scene]");
+    const photos = stageRef.current!.querySelectorAll<HTMLElement>("[data-photo]");
     const reduce = prefersReducedMotion();
     const first = shown.current === null;
+    photos.forEach((photo, i) => {
+      if (i === mode) {
+        gsap.set(photo, { zIndex: 1 });
+        if (first || reduce) gsap.set(photo, { autoAlpha: 1, scale: 1 });
+        else gsap.fromTo(photo, { autoAlpha: 0, scale: 1.12 }, { autoAlpha: 1, scale: 1, duration: 1.1, ease: "expo.out", overwrite: true });
+      } else {
+        gsap.set(photo, { zIndex: 0 });
+        gsap.to(photo, { autoAlpha: 0, duration: first || reduce ? 0 : 0.6, delay: first || reduce ? 0 : 0.5, overwrite: true });
+      }
+    });
     scenes.forEach((scene, i) => {
       const pops = scene.querySelectorAll("[data-pop]");
       if (i === mode) {
@@ -262,6 +285,20 @@ export default function Experience({ ref }: { ref?: Ref<ExperienceHandle> }) {
 
       <div className={s.stageWrap} data-exp-stage>
         <div ref={stageRef} className={s.stage} id="exp-stage" role="tabpanel" aria-labelledby={`exp-tab-${mode}`}>
+          <div className={s.photos} data-photo-pan>
+            {PHOTOS.map((photo, i) => (
+              <div key={photo.src} className={s.photo} data-photo>
+                <Image
+                  src={photo.src}
+                  alt={i === mode ? photo.alt : ""}
+                  fill
+                  sizes="(max-width: 860px) 100vw, 46vw"
+                  style={{ objectPosition: photo.focus }}
+                />
+              </div>
+            ))}
+          </div>
+          <div className={s.shade} aria-hidden="true" />
           {SCENES.map((scene, si) => (
             <div key={si} className={s.scene} data-scene aria-hidden="true">
               {scene.map((slot, i) => (
