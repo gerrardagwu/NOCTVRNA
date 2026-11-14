@@ -9,17 +9,14 @@ import Blink, { OWL_EYES } from "./Blink";
 import Countdown, { type CountdownHandle } from "./Countdown";
 import s from "./Hero.module.css";
 
-/** Width / height of the owl-face band (public/images/owl-face.jpg). */
-const OWL_RATIO = 1024 / 390;
-
 /**
- * Header geometry the hero owl, logo and countdown shrink into. Desktop: logo left, owl centred, Get
- * Access ticket right. Mobile: owl at the far left with the logo beside it, ticket right. The countdown
- * hangs just below the header on the right, in a small tab (tabX / tabY are its padding).
+ * Header geometry the hero logo and countdown shrink into (the owl stays in the hero and fades with it).
+ * Desktop: logo left, countdown centred, Get Access ticket right. Mobile: logo left, ticket right, and the
+ * countdown hangs just below the header on the right in a small tab (tabX / tabY are its padding).
  */
 const HEADER = {
-  desktop: { height: 76, pad: 32, owl: 50, gap: 12, logo: 30, card: 24, tabX: 12, tabY: 8, owlCentred: true },
-  mobile: { height: 60, pad: 16, owl: 32, gap: 10, logo: 22, card: 18, tabX: 8, tabY: 7, owlCentred: false },
+  desktop: { height: 76, pad: 32, logo: 30, card: 30, tabX: 0, tabY: 0, timerInBar: true },
+  mobile: { height: 60, pad: 16, logo: 22, card: 18, tabX: 8, tabY: 7, timerInBar: false },
 };
 
 /** Layout rect of an element with any GSAP transform taken off, so header targets stay correct after resize. */
@@ -36,12 +33,11 @@ export default function Hero({ play }: { play: boolean }) {
   const countdown = useRef<CountdownHandle>(null);
 
   // Scroll: the logo and countdown live in a fixed layer and are scrubbed from their hero positions
-  // into a sticky header while the hero scrolls away.
+  // into the sticky header while the hero scrolls away; the owl and captions fade out with the hero.
   useGSAP(
     () => {
       const q = gsap.utils.selector(root);
       const hero = q("[data-hero]")[0] as HTMLElement;
-      const owl = q("[data-owl]")[0] as HTMLElement;
       const logo = q("[data-logo]")[0] as HTMLElement;
       const timer = q("[data-cd-wrap]")[0] as HTMLElement;
       const card = q("[data-card]")[0] as HTMLElement;
@@ -52,17 +48,18 @@ export default function Hero({ play }: { play: boolean }) {
         const h = ctx.conditions?.mobile ? HEADER.mobile : HEADER.desktop;
         const viewportW = () => document.documentElement.clientWidth;
         const timerScale = () => h.card / card.offsetHeight;
-        const owlW = h.owl * OWL_RATIO;
 
-        // The tab the countdown sits in, sized to the shrunken timer.
+        // On mobile the countdown sits in a tab under the header, sized to the shrunken timer.
         const sizeTab = () =>
           gsap.set(tab, {
             width: untransformed(timer).width * timerScale() + h.tabX * 2,
             height: h.card + h.tabY * 2,
             right: h.pad,
           });
-        sizeTab();
-        ScrollTrigger.addEventListener("refresh", sizeTab);
+        if (!h.timerInBar) {
+          sizeTab();
+          ScrollTrigger.addEventListener("refresh", sizeTab);
+        }
 
         gsap
           .timeline({
@@ -76,21 +73,10 @@ export default function Hero({ play }: { play: boolean }) {
             },
           })
           .fromTo(
-            owl,
-            { x: 0, y: 0, scale: 1 },
-            {
-              x: () => (h.owlCentred ? (viewportW() - owlW) / 2 : h.pad) - untransformed(owl).left,
-              y: () => (h.height - h.owl) / 2 - untransformed(owl).top,
-              scale: () => h.owl / owl.offsetHeight,
-              ease: "power1.inOut",
-            },
-            0,
-          )
-          .fromTo(
             logo,
             { x: 0, y: 0, scale: 1 },
             {
-              x: () => (h.owlCentred ? h.pad : h.pad + owlW + h.gap) - untransformed(logo).left,
+              x: () => h.pad - untransformed(logo).left,
               y: () => (h.height - h.logo) / 2 - untransformed(logo).top,
               scale: () => h.logo / logo.offsetHeight,
               ease: "power1.inOut",
@@ -103,9 +89,10 @@ export default function Hero({ play }: { play: boolean }) {
             {
               x: () => {
                 const r = untransformed(timer);
-                return viewportW() - h.pad - h.tabX - r.width * timerScale() - r.left;
+                const w = r.width * timerScale();
+                return (h.timerInBar ? (viewportW() - w) / 2 : viewportW() - h.pad - h.tabX - w) - r.left;
               },
-              y: () => h.height + h.tabY - untransformed(timer).top,
+              y: () => (h.timerInBar ? (h.height - h.card) / 2 : h.height + h.tabY) - untransformed(timer).top,
               scale: timerScale,
               ease: "power1.inOut",
             },
@@ -114,7 +101,7 @@ export default function Hero({ play }: { play: boolean }) {
           .fromTo(q("[data-fade]"), { autoAlpha: 1, y: 0 }, { autoAlpha: 0, y: -48, duration: 0.45 }, 0)
           .fromTo(q("[data-cd-label]"), { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.3 }, 0.1)
           .fromTo(q("[data-bg]"), { yPercent: 0, opacity: 1 }, { yPercent: 22, opacity: 0.35 }, 0)
-          .fromTo(q("[data-bar], [data-cd-tab]"), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.25 }, 0.75);
+          .fromTo(q(h.timerInBar ? "[data-bar]" : "[data-bar], [data-cd-tab]"), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.25 }, 0.75);
 
         return () => ScrollTrigger.removeEventListener("refresh", sizeTab);
       });
@@ -201,8 +188,8 @@ export default function Hero({ play }: { play: boolean }) {
   return (
     <div ref={root} className={s.root}>
       <div className={s.layer}>
-        {/* The whole header bar is a back-to-top button. The owl and timer sit on it without catching
-            clicks, so tapping them lands here too; the logo is its own link to the same place. */}
+        {/* The whole header bar is a back-to-top button. The timer sits on it without catching clicks, so
+            tapping it lands here too; the logo is its own link to the same place. */}
         <button type="button" className={s.bar} data-bar onClick={scrollToTop} aria-label="Back to top" />
         <div className={s.cdTab} data-cd-tab aria-hidden="true" />
         <a href="#enter" className={s.ticket} data-ticket data-intro onClick={onTicket}>
@@ -214,7 +201,7 @@ export default function Hero({ play }: { play: boolean }) {
           </span>
         </a>
         <div className={s.stage}>
-          <div className={s.owl} data-owl>
+          <div className={s.owl} data-owl data-fade>
             <div data-intro className={s.owlInner}>
               <Image src="/images/owl-face.jpg" alt="" fill sizes="(max-width: 760px) 72vw, 460px" priority quality={85} />
               <Blink eyes={OWL_EYES.face} />

@@ -34,7 +34,7 @@
   visibility: hidden;
 }
 
-/* The countdown's tab, hanging just below the header on the right. Sized from JS to the shrunken timer. */
+/* Mobile: the countdown's tab, hanging just below the header on the right. Sized from JS to the timer. */
 .cdTab {
   position: absolute;
   top: var(--header-h);
@@ -159,15 +159,13 @@
 }
 
 /* A wide band of the owl's face (from the poster), feathered at every edge so it melts into the night
-   behind the logo rather than sitting in a badge. */
+   behind the logo rather than sitting in a badge. It stays in the hero and fades out with it. */
 .owl {
   position: absolute;
   left: calc(50% - 230 * var(--u));
   top: calc(-38 * var(--u));
   width: calc(460 * var(--u));
   aspect-ratio: 1024 / 390;
-  transform-origin: 0 0;
-  will-change: transform;
 }
 
 .owlInner {
