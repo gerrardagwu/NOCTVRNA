@@ -4,7 +4,7 @@
   pointer-events: none;
 }
 
-/* The eye socket clips both lids to an eye shape; --lid runs 0 (open) to 1 (shut). */
+/* The eye socket clips the lid to an eye shape; --lid runs 0 (open) to 1 (shut). */
 .eye {
   --lid: 0;
   position: absolute;
@@ -13,28 +13,24 @@
   overflow: hidden;
 }
 
-.upper,
-.lower {
+/*
+  The lid is the owl's own closed eyelid, cut from the teaser video's blink (wrinkled dark skin with
+  the feathered rim around it, soft-edged to the eye's oval). It waits just above the eye and slides
+  down over it, so the skin itself moves the way a real lid does, rather than a shape fading in.
+*/
+.lid {
   position: absolute;
-  left: -6%;
-  right: -6%;
-  transform: scaleY(var(--lid));
+  inset: 0;
+  background-position: center;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  transform: translateY(calc((var(--lid) - 1) * 100%));
 }
 
-/* Feather-dark lids with a lighter brow, so a shut eye reads as plumage, not a hole. Shut, they
-   overlap a little past the middle so no iris shows through the seam. */
-.upper {
-  top: -6%;
-  height: 68%;
-  transform-origin: 50% 0;
-  background: linear-gradient(180deg, #3d1d63 0%, #24103d 55%, #12071e 86%, #040106 100%);
-  border-radius: 0 0 50% 50% / 0 0 38% 38%;
+.left {
+  background-image: url("/images/lid-left.png");
 }
 
-.lower {
-  bottom: -6%;
-  height: 50%;
-  transform-origin: 50% 100%;
-  background: linear-gradient(0deg, #321853 0%, #1d0c33 60%, #040106 100%);
-  border-radius: 50% 50% 0 0 / 38% 38% 0 0;
+.right {
+  background-image: url("/images/lid-right.png");
 }

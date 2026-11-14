@@ -38,8 +38,7 @@
 }
 
 .cityInner {
-  /* Poster width; the two words around it scale with it. */
-  --pw: clamp(240px, 32vw, 480px);
+  --pw: clamp(240px, 32vw, 480px); /* poster width */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -95,45 +94,6 @@
 
 .posterArt img {
   object-fit: cover;
-}
-
-/*
-  "THE NIGHT" and "IS CALLING" sit over the poster's edges, placed in proportion to the poster as in
-  the design (centre offset 170/458 of its width, 199/537 down, type 70/458 of its width). Where a word
-  crosses the artwork it breaks up into grain and screens into the image: a fading mask hands over to a
-  speckled one across the overlap.
-*/
-.night {
-  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 3.4 -1.45'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
-  position: absolute;
-  top: calc(var(--pw) * 0.4345);
-  z-index: 2;
-  font-family: var(--font-neuvorte), serif;
-  font-size: calc(var(--pw) * 0.1528);
-  line-height: 1.43;
-  letter-spacing: -0.04em;
-  color: var(--neon);
-  white-space: nowrap;
-  mix-blend-mode: screen;
-  mask-size: 100% 100%, 140px 140px;
-  mask-composite: add;
-  -webkit-mask-composite: source-over;
-}
-
-.night > span {
-  display: inline-block;
-}
-
-.nightLeft {
-  right: calc(50% + var(--pw) * 0.3712);
-  mask-image: linear-gradient(to right, #000 70%, transparent 94%), var(--grain);
-  -webkit-mask-image: linear-gradient(to right, #000 70%, transparent 94%), var(--grain);
-}
-
-.nightRight {
-  left: calc(50% + var(--pw) * 0.3712);
-  mask-image: linear-gradient(to left, #000 74%, transparent 95%), var(--grain);
-  -webkit-mask-image: linear-gradient(to left, #000 74%, transparent 95%), var(--grain);
 }
 
 /* ---------- Values: photo scenes, see Values.module.css ---------- */
@@ -300,28 +260,6 @@
 
   .headline {
     font-size: clamp(28px, 8.2vw, 36px);
-  }
-
-  .night {
-    top: auto;
-    font-size: 34px;
-    line-height: 1.2;
-  }
-
-  .nightLeft {
-    right: auto;
-    left: -12%;
-    bottom: calc(100% - 20px);
-    mask-image: linear-gradient(to bottom, #000 55%, transparent 100%), var(--grain);
-    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%), var(--grain);
-  }
-
-  .nightRight {
-    left: auto;
-    right: -12%;
-    top: calc(100% - 20px);
-    mask-image: linear-gradient(to top, #000 55%, transparent 100%), var(--grain);
-    -webkit-mask-image: linear-gradient(to top, #000 55%, transparent 100%), var(--grain);
   }
 
   .enterInner {

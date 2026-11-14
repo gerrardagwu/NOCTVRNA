@@ -72,9 +72,7 @@ export default function Stack() {
       };
 
       const mm = gsap.matchMedia();
-      mm.add({ mobile: "(max-width: 760px)", desktop: "(min-width: 761px)" }, (ctx) => {
-        const mobile = ctx.conditions?.mobile;
-
+      mm.add({ mobile: "(max-width: 760px)", desktop: "(min-width: 761px)" }, () => {
         // 1. Experience: pinned while scroll walks the three scenes.
         let expMode = 0;
         const exp = gsap.timeline({
@@ -100,7 +98,7 @@ export default function Stack() {
         });
         exp.to({}, { duration: EXP.end });
 
-        // 2. The city: words and poster arrive as it scrolls in; the two words slide out over the poster.
+        // 2. The city: words and poster arrive as it scrolls in.
         gsap
           .timeline({ scrollTrigger: { trigger: city, start: "top bottom", end: "top 10%", scrub: 0.6 } })
           .fromTo(headline.words, { opacity: 0.08, yPercent: 40 }, { opacity: 1, yPercent: 0, stagger: 0.02, duration: 0.6, ease: "none" });
@@ -109,17 +107,16 @@ export default function Stack() {
           { yPercent: 14, scale: 0.88, rotateX: 14 },
           { yPercent: 0, scale: 1, rotateX: 0, ease: "power2.out", scrollTrigger: { trigger: q("[data-poster-area]")[0], start: "top bottom", end: "top 35%", scrub: 0.6 } },
         );
-        gsap
-          .timeline({ scrollTrigger: { trigger: q("[data-poster-area]")[0], start: "top 70%", end: "center 55%", scrub: 0.6 } })
-          .fromTo(q("[data-night]"), mobile ? { y: 30, autoAlpha: 0 } : { xPercent: 45, autoAlpha: 0 }, { xPercent: 0, y: 0, autoAlpha: 1, ease: "power2.out" }, 0)
-          .fromTo(q("[data-calling]"), mobile ? { y: -30, autoAlpha: 0 } : { xPercent: -45, autoAlpha: 0 }, { xPercent: 0, y: 0, autoAlpha: 1, ease: "power2.out" }, 0);
-
-        // ...then it holds (once its bottom reaches the bottom of the screen) while the values slide over it.
+        // ...then it holds while the values slide over it. It only holds once the section has reached the top
+        // of the screen, and (on short screens) has scrolled just far enough to show the whole poster, so the
+        // headline and poster are never covered while still part-way down the screen.
+        const posterArea = q("[data-poster-area]")[0] as HTMLElement;
+        const posterBottom = () => posterArea.offsetTop + posterArea.offsetHeight + 16; // within the city section
         gsap
           .timeline({
             scrollTrigger: {
               trigger: city,
-              start: () => (city.offsetHeight > vh() ? "bottom bottom" : "top top"),
+              start: () => `top+=${Math.max(0, posterBottom() - vh())} top`,
               end: () => `+=${vh()}`,
               pin: true,
               pinSpacing: false,
@@ -201,12 +198,6 @@ export default function Stack() {
                   <Blink eyes={OWL_EYES.poster} />
                 </div>
               </div>
-              <p className={`${s.night} ${s.nightLeft}`}>
-                <span data-night>THE NIGHT</span>
-              </p>
-              <p className={`${s.night} ${s.nightRight}`}>
-                <span data-calling>IS CALLING</span>
-              </p>
             </div>
           </div>
         </section>

@@ -65,8 +65,7 @@ export default function Blink({ eyes, className }: { eyes: Eye[]; className?: st
           className={s.eye}
           style={{ left: `${e.x}%`, top: `${e.y}%`, width: `${e.w}%`, height: `${e.h}%` }}
         >
-          <i className={s.upper} />
-          <i className={s.lower} />
+          <i className={`${s.lid} ${i === 0 ? s.left : s.right}`} />
         </span>
       ))}
     </span>
