@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useImperativeHandle, useRef, type Ref } from "react";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/gsap";
 import s from "./Blink.module.css";
 
@@ -22,39 +22,77 @@ export const OWL_EYES = {
   ],
 } satisfies Record<string, Eye[]>;
 
+export type BlinkHandle = {
+  /** Stop the idle blinking and close the eyes slowly; resolves once they're shut. */
+  shut: (duration?: number) => Promise<void>;
+};
+
+/** Base timings for one blink, in seconds; `pace` stretches them. */
+const CLOSE = 0.08;
+const HOLD = 0.04;
+const OPEN = 0.17;
+
 /**
  * Eyelids laid over an owl image. Place inside a positioned box the same size as the artwork.
  * Blinks every few seconds, now and then twice in a row, for as long as it's on the page.
+ * `pace` slows the blink itself (1.6 reads as relaxed, 2.5 as sleepy).
  */
-export default function Blink({ eyes, className }: { eyes: Eye[]; className?: string }) {
+export default function Blink({
+  eyes,
+  className,
+  pace = 1.6,
+  ref,
+}: {
+  eyes: Eye[];
+  className?: string;
+  pace?: number;
+  ref?: Ref<BlinkHandle>;
+}) {
   const root = useRef<HTMLSpanElement>(null);
+  const next = useRef<gsap.core.Tween | null>(null);
+  const current = useRef<gsap.core.Timeline | null>(null);
 
   useGSAP(
     () => {
       if (prefersReducedMotion()) return;
       const lids = root.current!.querySelectorAll(`.${s.eye}`);
-      let next: gsap.core.Tween | null = null;
 
       const blink = () => {
         const tl = gsap.timeline({ onComplete: schedule });
         const times = Math.random() < 0.22 ? 2 : 1;
         for (let i = 0; i < times; i++) {
-          tl.to(lids, { "--lid": 1, duration: 0.07, ease: "power2.in" }).to(lids, {
+          tl.to(lids, { "--lid": 1, duration: CLOSE * pace, ease: "power2.in" }).to(lids, {
             "--lid": 0,
-            duration: 0.16,
+            duration: OPEN * pace,
             ease: "power3.out",
-            delay: 0.03,
+            delay: HOLD * pace,
           });
         }
+        current.current = tl;
       };
       const schedule = () => {
-        next = gsap.delayedCall(1.8 + Math.random() * 3.4, blink);
+        next.current = gsap.delayedCall(2 + Math.random() * 3.4, blink);
       };
 
-      next = gsap.delayedCall(0.6 + Math.random() * 2, blink);
-      return () => next?.kill();
+      next.current = gsap.delayedCall(0.6 + Math.random() * 2, blink);
+      return () => next.current?.kill();
     },
     { scope: root },
+  );
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      shut: (duration = 0.5) =>
+        new Promise<void>((resolve) => {
+          next.current?.kill();
+          current.current?.kill();
+          const lids = root.current?.querySelectorAll(`.${s.eye}`);
+          if (!lids?.length || prefersReducedMotion()) return resolve();
+          gsap.to(lids, { "--lid": 1, duration, ease: "power2.inOut", onComplete: resolve });
+        }),
+    }),
+    [],
   );
 
   return (

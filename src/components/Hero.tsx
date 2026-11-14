@@ -8,10 +8,13 @@ import Blink, { OWL_EYES } from "./Blink";
 import Countdown, { type CountdownHandle } from "./Countdown";
 import s from "./Hero.module.css";
 
-/** Header geometry the hero owl, logo and countdown shrink into: owl and logo on the left, timer on the right. */
+/**
+ * Header geometry the hero owl, logo and countdown shrink into. Desktop: logo left, owl centred,
+ * timer right. Mobile: owl at the far left with the logo beside it, timer right.
+ */
 const HEADER = {
-  desktop: { height: 76, pad: 32, owl: 46, gap: 12, logo: 30, card: 30 },
-  mobile: { height: 60, pad: 16, owl: 34, gap: 8, logo: 22, card: 20 },
+  desktop: { height: 76, pad: 32, owl: 50, gap: 12, logo: 30, card: 30, owlCentred: true },
+  mobile: { height: 60, pad: 16, owl: 34, gap: 8, logo: 22, card: 20, owlCentred: false },
 };
 
 /** Layout rect of an element with any GSAP transform taken off, so header targets stay correct after resize. */
@@ -59,7 +62,7 @@ export default function Hero({ play }: { play: boolean }) {
             owl,
             { x: 0, y: 0, scale: 1 },
             {
-              x: () => h.pad - untransformed(owl).left,
+              x: () => (h.owlCentred ? (viewportW() - h.owl) / 2 : h.pad) - untransformed(owl).left,
               y: () => (h.height - h.owl) / 2 - untransformed(owl).top,
               scale: () => h.owl / owl.offsetHeight,
               ease: "power1.inOut",
@@ -70,7 +73,7 @@ export default function Hero({ play }: { play: boolean }) {
             logo,
             { x: 0, y: 0, scale: 1 },
             {
-              x: () => h.pad + h.owl + h.gap - untransformed(logo).left,
+              x: () => (h.owlCentred ? h.pad : h.pad + h.owl + h.gap) - untransformed(logo).left,
               y: () => (h.height - h.logo) / 2 - untransformed(logo).top,
               scale: () => h.logo / logo.offsetHeight,
               ease: "power1.inOut",

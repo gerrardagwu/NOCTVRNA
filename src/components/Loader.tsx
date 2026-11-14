@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useRef } from "react";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/gsap";
-import Blink, { OWL_EYES } from "./Blink";
+import Blink, { OWL_EYES, type BlinkHandle } from "./Blink";
 import s from "./Loader.module.css";
 
 const pageLoaded = () =>
@@ -14,9 +14,13 @@ const pageLoaded = () =>
 
 const wait = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
 
-/** Full-screen owl from the Figma "Loader" frame. Holds until fonts and images are in, then lifts. */
+/**
+ * Full-screen owl from the Figma "Loader" frame. It blinks slowly while fonts and images load; once
+ * they're in, it closes its eyes one last time and the page opens on that blink.
+ */
 export default function Loader({ onReveal }: { onReveal: () => void }) {
   const root = useRef<HTMLDivElement>(null);
+  const blink = useRef<BlinkHandle>(null);
 
   useGSAP(
     (_ctx, contextSafe) => {
@@ -50,12 +54,15 @@ export default function Loader({ onReveal }: { onReveal: () => void }) {
         intro.pause();
         gsap
           .timeline({ onComplete: () => root.current?.setAttribute("hidden", "") })
-          .to(owl, { scale: 1.35, autoAlpha: 0, filter: "blur(8px)", duration: reduce ? 0.2 : 0.8, ease: "power2.in" })
-          .add(onReveal, reduce ? 0 : 0.45)
-          .to(root.current, { autoAlpha: 0, duration: reduce ? 0.2 : 0.7, ease: "power2.out" }, reduce ? 0 : 0.5);
+          .add(onReveal, 0)
+          .to(owl, { scale: 1.25, autoAlpha: 0, duration: reduce ? 0.2 : 0.75, ease: "power2.in" }, 0)
+          .to(root.current, { autoAlpha: 0, duration: reduce ? 0.2 : 0.65, ease: "power2.out" }, reduce ? 0 : 0.15);
       });
 
-      Promise.race([ready, wait(6000)]).then(lift);
+      // The last blink: eyes close slowly, and the page opens while they're shut.
+      Promise.race([ready, wait(6000)])
+        .then(() => blink.current?.shut(reduce ? 0 : 0.55))
+        .then(lift);
     },
     { scope: root },
   );
@@ -64,7 +71,7 @@ export default function Loader({ onReveal }: { onReveal: () => void }) {
     <div ref={root} className={s.loader} data-loader aria-hidden="true">
       <div className={s.owl}>
         <Image src="/images/loader-owl.png" alt="" width={318} height={318} priority />
-        <Blink eyes={OWL_EYES.loader} />
+        <Blink eyes={OWL_EYES.loader} pace={2.6} ref={blink} />
       </div>
     </div>
   );

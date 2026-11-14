@@ -180,69 +180,86 @@
   min-width: 0;
 }
 
+/* The sticker sheet: a flat near-black card, no glow, stickers laid out in % of the card. */
 .stage {
   --r: 36px;
   position: relative;
   height: min(68svh, 640px);
   border-radius: var(--r);
   overflow: hidden;
-  cursor: pointer;
-  background: #0b0710;
-  box-shadow:
-    0 0 0 1px rgb(255 255 255 / 0.06),
-    0 40px 100px -30px color-mix(in srgb, var(--c) 55%, transparent);
-  transition: box-shadow 0.8s var(--ease-out);
+  background: #08070e;
+  container-type: size;
   touch-action: manipulation;
   user-select: none;
 }
 
-.canvas {
+.scene {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
+}
+
+/* Each sticker is four nested layers so the motions never fight:
+   slot (place + tilt, CSS) > drift (parallax, GSAP) > pop (enter + tap reactions, GSAP) > lift (hover, CSS) > bob (beat, CSS). */
+.slot {
+  position: absolute;
+  transform: translate(-50%, -50%) rotate(var(--rot, 0deg));
+}
+
+.pop {
+  cursor: pointer;
+  will-change: transform;
+}
+
+.lift {
+  transition: transform 0.45s var(--ease-out);
+}
+
+.slot:hover .lift {
+  transform: translateY(-5%) scale(1.08) rotate(-4deg);
+  transition-duration: 0.3s;
+}
+
+/* Every sticker nods along at 124 bpm, each a little out of step with the next. */
+.bob {
+  animation: bob 0.968s ease-in-out infinite alternate;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes bob {
+  from {
+    transform: translateY(0) rotate(0deg);
+  }
+  to {
+    transform: translateY(-3%) rotate(1.5deg);
+  }
+}
+
+.bob svg {
   display: block;
+  width: 100%;
+  height: auto;
 }
 
-/* A soft light that follows the cursor over the stage. */
-.spotlight {
+.stage[data-paused] .bob,
+.stage[data-paused] .live i {
+  animation-play-state: paused;
+}
+
+.live {
   position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    280px circle at var(--mx, 50%) var(--my, 50%),
-    color-mix(in srgb, var(--c) 22%, transparent),
-    transparent 70%
-  );
-  mix-blend-mode: screen;
-  opacity: 0;
-  transition: opacity 0.5s var(--ease-out);
-  pointer-events: none;
-}
-
-.stage:hover .spotlight {
-  opacity: 1;
-}
-
-.live,
-.hint {
-  position: absolute;
+  top: 18px;
+  left: 18px;
   display: inline-flex;
   align-items: center;
   gap: 10px;
   padding: 10px 16px;
   border-radius: 999px;
-  background: rgb(14 11 18 / 0.78);
-  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.08);
+  background: rgb(245 241 229 / 0.08);
   font-size: 14px;
+  font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--ink);
   pointer-events: none;
-}
-
-.live {
-  top: 18px;
-  left: 18px;
-  font-weight: 700;
 }
 
 .live i {
@@ -260,40 +277,6 @@
   }
   100% {
     box-shadow: 0 0 0 0 rgb(85 255 0 / 0);
-  }
-}
-
-.hint {
-  left: 50%;
-  bottom: 18px;
-  transform: translateX(-50%);
-  white-space: nowrap;
-  animation: hintIn 0.6s var(--ease-out) both;
-}
-
-.hint i {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 2px solid var(--c);
-  animation: tapHint 1.4s var(--ease-out) infinite;
-}
-
-@keyframes hintIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, 10px);
-  }
-}
-
-@keyframes tapHint {
-  0% {
-    transform: scale(0.6);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1.3);
-    opacity: 0;
   }
 }
 
@@ -349,8 +332,11 @@
     min-height: 240px;
   }
 
-  .hint {
-    font-size: 13px;
+  .live {
+    top: 12px;
+    left: 12px;
+    padding: 8px 12px;
+    font-size: 12px;
   }
 }
 
@@ -358,9 +344,12 @@
   .ch,
   .eq i,
   .live i,
-  .hint i,
   .desc,
-  .hint {
+  .bob {
     animation: none !important;
+  }
+
+  .lift {
+    transition: none;
   }
 }

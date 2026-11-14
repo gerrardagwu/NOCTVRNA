@@ -20,14 +20,14 @@ npm run build && npm start
 
 | Section | Behaviour | File |
 | --- | --- | --- |
-| Loader | The owl from the Figma "Loader" frame fades up, its eyes glow, and it lifts once fonts and images are in. | `src/components/Loader.tsx` |
+| Loader | The owl from the Figma "Loader" frame fades up and blinks slowly while fonts and images load, then closes its eyes one last time and the page opens on that blink. | `src/components/Loader.tsx` |
 | Hero | Full screen. The NOCTVRNA logo switches on like a tube light catching (flicker, then a steady glow with a faint hum), and the city lights up behind it. | `src/components/Hero.tsx` |
 | Countdown | Live split-flap countdown to 12 December 2026 (days, hours, minutes, seconds). The cards swing open, cascade through the digits like a calendar, then every tick lifts the bottom flap up and over. | `src/components/FlipDigit.tsx`, `Countdown.tsx` |
-| Header | As the hero scrolls away, the owl, the logo and the countdown shrink into a sticky header (owl and logo left, countdown right). Scroll back up and they grow back. | `src/components/Hero.tsx` |
+| Header | As the hero scrolls away, the owl, the logo and the countdown shrink into a sticky header. Desktop: logo left, owl centred, countdown right. Mobile: owl far left with the logo beside it, countdown right. Scroll back up and they grow back. | `src/components/Hero.tsx` |
 | Blinking owl | Eyelids drawn over the owl artwork blink every few seconds, sometimes twice: hero/header badge, poster, values sticker and loader. Eye positions are in `OWL_EYES`. | `src/components/Blink.tsx` |
 | Purple strip | Endless marquee. It always drifts, speeds up when you scroll and reverses when you scroll up. | `src/components/Strip.tsx` |
 | Beyond the ordinary | The heading stays put while the copy scrolls past; when the copy runs out they leave together. The lead paragraph lights up word by word. | `src/components/Manifesto.tsx` |
-| Sound / People / Atmosphere | Full-screen scene. Scroll (or hover/tap a word) to change the stage: a spinning vinyl with a pumping ring of bars, a crowd dancing under the lights, sweeping beams and a mirror ball. Tap the stage to drop the bass, make the crowd jump (confetti) or fire the strobe. | `src/components/Experience.tsx`, `src/lib/partyStage.ts` |
+| Sound / People / Atmosphere | Full-screen scene. Scroll (or hover/tap a word) to swap the sticker sheet: a record sliding out of its sleeve and a speaker, hands up with a phone out, a mirror ball and lightning. Stickers nod to the beat, drift with the cursor, lift on hover and each does its own thing when tapped. | `src/components/Experience.tsx`, `src/components/Stickers.tsx` |
 | The city | THE NIGHT / IS CALLING slide out over the poster's edges and break up into grain where they cross the artwork. | `src/components/Stack.tsx` |
 | Our philosophy | Originality, Freedom of Expression and Intentional Curation each flood the screen in a brand colour (deep purple, green, lilac), wiping in from a spinning owl sticker. Letters hop under the cursor, the sticker speeds up and drifts toward you, the tags wiggle. | `src/components/Values.tsx` |
 | Sign-up | Covers the values; lines rise in, the glow breathes. | `src/components/Stack.tsx` |

@@ -1,121 +1,207 @@
 "use client";
 
-import { useEffect, useImperativeHandle, useRef, useState, type KeyboardEvent, type Ref } from "react";
+import { useEffect, useImperativeHandle, useRef, useState, type KeyboardEvent, type ReactNode, type Ref } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
-import { PartyStage, type StageMode } from "@/lib/partyStage";
+import { Bolt, Burst, COLORS, DiscoBall, Note, PhoneHand, RockHand, Sparkle, Speaker, Vinyl } from "./Stickers";
 import s from "./Experience.module.css";
 
-const MODES: { key: StageMode; word: string; desc: string; hint: string; color: string }[] = [
+type Kind = "vinyl" | "speaker" | "note" | "rock" | "phone" | "burst" | "ball" | "bolt" | "sparkle";
+
+/** A sticker on the stage: centre (x, y) and max width/height in % of the stage, its art's aspect ratio, tilt and parallax depth. */
+type Slot = { kind: Kind; x: number; y: number; w: number; h: number; ar: number; rot: number; depth: number; art: ReactNode };
+
+const SCENES: Slot[][] = [
+  // Sound: a record sliding out of its sleeve, a speaker, notes in the air.
+  [
+    { kind: "vinyl", x: 40, y: 55, w: 58, h: 56, ar: 1.45, rot: -6, depth: 1, art: <Vinyl /> },
+    { kind: "speaker", x: 82, y: 60, w: 24, h: 50, ar: 0.905, rot: 8, depth: 1.6, art: <Speaker /> },
+    { kind: "note", x: 70, y: 19, w: 10, h: 18, ar: 0.75, rot: 12, depth: 2.4, art: <Note /> },
+    { kind: "note", x: 17, y: 20, w: 9, h: 16, ar: 0.75, rot: -14, depth: 2.2, art: <Note color={COLORS.LILAC} /> },
+    { kind: "sparkle", x: 91, y: 23, w: 7, h: 9, ar: 1, rot: 0, depth: 3, art: <Sparkle /> },
+  ],
+  // People: hands up, phones out.
+  [
+    { kind: "rock", x: 30, y: 58, w: 30, h: 64, ar: 0.68, rot: -12, depth: 1.2, art: <RockHand /> },
+    { kind: "phone", x: 70, y: 55, w: 30, h: 64, ar: 0.73, rot: 10, depth: 1.5, art: <PhoneHand /> },
+    { kind: "burst", x: 51, y: 18, w: 20, h: 24, ar: 1, rot: -8, depth: 2.4, art: <Burst /> },
+    { kind: "sparkle", x: 13, y: 22, w: 7, h: 9, ar: 1, rot: 0, depth: 3, art: <Sparkle color={COLORS.PAPER} /> },
+    { kind: "sparkle", x: 89, y: 84, w: 7, h: 9, ar: 1, rot: 0, depth: 2.8, art: <Sparkle color={COLORS.GREEN} /> },
+  ],
+  // Atmosphere: a mirror ball, lightning, glints.
+  [
+    { kind: "ball", x: 50, y: 45, w: 36, h: 64, ar: 0.833, rot: 0, depth: 1, art: <DiscoBall /> },
+    { kind: "bolt", x: 17, y: 60, w: 13, h: 34, ar: 0.579, rot: -16, depth: 2, art: <Bolt /> },
+    { kind: "bolt", x: 84, y: 64, w: 11, h: 30, ar: 0.579, rot: 18, depth: 2.2, art: <Bolt color={COLORS.CORAL} /> },
+    { kind: "sparkle", x: 28, y: 20, w: 7, h: 9, ar: 1, rot: 0, depth: 3, art: <Sparkle /> },
+    { kind: "sparkle", x: 75, y: 17, w: 6, h: 8, ar: 1, rot: 0, depth: 2.6, art: <Sparkle color={COLORS.PAPER} /> },
+    { kind: "sparkle", x: 62, y: 87, w: 6, h: 8, ar: 1, rot: 0, depth: 2.4, art: <Sparkle color={COLORS.LILAC} /> },
+  ],
+];
+
+const MODES = [
   {
-    key: "sound",
     word: "Sound.",
     desc: "Carefully curated DJ sets and selected live performances, from emerging and established talent across electronic music and contemporary sounds.",
-    hint: "Tap the deck to drop the bass",
     color: "#c38bef",
   },
   {
-    key: "people",
     word: "People.",
     desc: "Music lovers, tastemakers and creatives. A room full of people who came for the same reason you did.",
-    hint: "Tap to get the crowd jumping",
     color: "#edc1fc",
   },
   {
-    key: "atmos",
     word: "Atmosphere.",
     desc: "Immersive production and a distinct visual identity for every edition. Nothing here is accidental.",
-    hint: "Tap for strobe",
     color: "#55ff00",
   },
 ];
 
+const BEAT = 60 / 124; // seconds per beat at 124 bpm
+
 export type ExperienceHandle = {
   /** Switch scene (from scroll). */
   setMode: (index: number) => void;
-  /** Pause drawing while another scene covers this one. */
+  /** Pause the idle motion while another scene covers this one. */
   setActive: (active: boolean) => void;
 };
 
-/** Sound. People. Atmosphere. Pick a word (or keep scrolling) and the stage changes scene; tap the stage to play. */
+/** What each sticker does when you tap it. `pop` is the sticker's own wrapper; parts are inside its SVG. */
+function react(kind: Kind, pop: HTMLElement, idle: Map<string, gsap.core.Tween>) {
+  const part = (name: string) => pop.querySelectorAll(`[data-part="${name}"]`);
+  gsap.fromTo(pop, { scaleX: 1.14, scaleY: 0.86 }, { scaleX: 1, scaleY: 1, duration: 0.6, ease: "expo.out" });
+
+  switch (kind) {
+    case "vinyl": {
+      const spin = idle.get("disc");
+      if (spin) gsap.fromTo(spin, { timeScale: 9 }, { timeScale: 1, duration: 1.6, ease: "power2.out" });
+      gsap.fromTo(part("disc"), { x: 0 }, { keyframes: [{ x: 24, duration: 0.25 }, { x: 0, duration: 0.6 }], ease: "power2.out" });
+      break;
+    }
+    case "speaker":
+      gsap.fromTo(part("cone"), { scale: 1.35 }, { scale: 1, duration: 0.14, repeat: 4, ease: "power1.out", transformOrigin: "50% 50%" });
+      gsap.fromTo(part("ring"), { opacity: 1 }, { opacity: 0, duration: 0.7, stagger: 0.12, ease: "power2.out" });
+      break;
+    case "note":
+      gsap.fromTo(pop, { y: 0, rotation: 0 }, { keyframes: [{ y: "-35%", rotation: 200, duration: 0.3, ease: "power2.out" }, { y: 0, rotation: 360, duration: 0.45, ease: "power2.in" }] });
+      break;
+    case "rock":
+      gsap.to(pop, { keyframes: { rotation: [0, -16, 13, -9, 5, 0] }, duration: 0.7, ease: "power2.out" });
+      break;
+    case "phone":
+      gsap.fromTo(part("flash"), { opacity: 1, scale: 0.6, transformOrigin: "50% 50%" }, { opacity: 0, scale: 1.25, duration: 0.55, ease: "power2.out" });
+      gsap.fromTo(part("flash-dot"), { fill: "#fbf8f1" }, { fill: "#ffd43b", duration: 0.6 });
+      break;
+    case "burst":
+    case "sparkle":
+      gsap.fromTo(pop, { rotation: 0 }, { rotation: 180, duration: 0.8, ease: "expo.out" });
+      break;
+    case "ball": {
+      const slide = idle.get("facets");
+      if (slide) gsap.fromTo(slide, { timeScale: 7 }, { timeScale: 1, duration: 1.8, ease: "power2.out" });
+      break;
+    }
+    case "bolt":
+      gsap.fromTo(pop, { opacity: 0.2 }, { keyframes: { opacity: [0.2, 1, 0.3, 1] }, duration: 0.45, ease: "none" });
+      break;
+  }
+}
+
+/** Sound. People. Atmosphere. Pick a word (or keep scrolling) and the sticker sheet on the right changes; poke the stickers to play. */
 export default function Experience({ ref }: { ref?: Ref<ExperienceHandle> }) {
   const [mode, setMode] = useState(0);
   const stageRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const renderer = useRef<PartyStage | null>(null);
-  const active = useRef(true);
+  const idle = useRef(new Map<string, gsap.core.Tween>());
+  const shown = useRef<number | null>(null);
 
   useImperativeHandle(
     ref,
     () => ({
       setMode: (i) => setMode(i),
       setActive: (on) => {
-        active.current = on;
+        stageRef.current?.toggleAttribute("data-paused", !on);
+        idle.current.forEach((t) => (on ? t.resume() : t.pause()));
       },
     }),
     [],
   );
 
-  // Renderer lifecycle: draw on GSAP's ticker only while the stage is on screen and uncovered.
+  // Idle motion, parallax and taps.
   useEffect(() => {
     const stage = stageRef.current!;
-    const stageRenderer = new PartyStage(canvasRef.current!, "/images/owl-badge.png");
-    renderer.current = stageRenderer;
     const reduce = prefersReducedMotion();
-    let visible = false;
+    const tweens = idle.current;
+    const q = gsap.utils.selector(stage);
 
-    const ro = new ResizeObserver(([entry]) => {
-      stageRenderer.resize(entry.contentRect.width, entry.contentRect.height);
-      if (reduce) stageRenderer.draw(performance.now());
-    });
-    ro.observe(stage);
-    const io = new IntersectionObserver(([entry]) => (visible = entry.isIntersecting));
-    io.observe(stage);
+    if (!reduce) {
+      tweens.set("disc", gsap.to(q('[data-part="disc"]'), { rotation: 360, transformOrigin: "50% 50%", duration: 2.4, ease: "none", repeat: -1 }));
+      tweens.set("facets", gsap.to(q('[data-part="facets"]'), { x: -72, duration: 1.8, ease: "none", repeat: -1 }));
+      tweens.set(
+        "cones",
+        gsap.to(q('[data-part="cone"]'), { scale: 1.14, transformOrigin: "50% 50%", duration: 0.12, ease: "power1.out", yoyo: true, repeat: -1, repeatDelay: BEAT - 0.24 }),
+      );
+    }
 
-    const tick = () => {
-      if (visible && active.current && !reduce) stageRenderer.draw(performance.now());
-    };
-    gsap.ticker.add(tick);
-
-    // Micro-interaction: the stage drifts toward the cursor and a spotlight follows it across the surface.
-    const lean = (x: number, y: number) => gsap.to(stage, { x, y, duration: 0.9, ease: "power3.out", overwrite: "auto" });
-    const local = (e: PointerEvent) => {
-      const r = stage.getBoundingClientRect();
-      return { x: e.clientX - r.left, y: e.clientY - r.top, w: r.width, h: r.height };
-    };
     const onMove = (e: PointerEvent) => {
-      const p = local(e);
-      stageRenderer.move(p.x, p.y);
-      stage.style.setProperty("--mx", `${p.x}px`);
-      stage.style.setProperty("--my", `${p.y}px`);
-      if (e.pointerType === "mouse" && !reduce) lean((p.x / p.w - 0.5) * 16, (p.y / p.h - 0.5) * 12);
+      if (e.pointerType !== "mouse" || reduce) return;
+      const r = stage.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5;
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      (q("[data-drift]") as HTMLElement[]).forEach((el) => {
+        const d = Number(el.dataset.drift);
+        gsap.to(el, { x: px * d * 18, y: py * d * 14, duration: 0.9, ease: "power3.out", overwrite: "auto" });
+      });
     };
-    const onLeave = () => {
-      stageRenderer.leave();
-      if (!reduce) lean(0, 0);
-    };
+    const onLeave = () => gsap.to(q("[data-drift]"), { x: 0, y: 0, duration: 1, ease: "power3.out", overwrite: "auto" });
     const onDown = (e: PointerEvent) => {
-      const p = local(e);
-      stageRenderer.tap(p.x, p.y);
-      if (reduce) stageRenderer.draw(performance.now());
-      else gsap.fromTo(stage, { scale: 0.975 }, { scale: 1, duration: 0.6, ease: "expo.out" });
+      const pop = (e.target as Element).closest<HTMLElement>("[data-pop]");
+      if (!pop || reduce) return;
+      react(pop.dataset.kind as Kind, pop, tweens);
     };
+
     stage.addEventListener("pointermove", onMove);
     stage.addEventListener("pointerleave", onLeave);
     stage.addEventListener("pointerdown", onDown);
-
     return () => {
-      gsap.ticker.remove(tick);
-      ro.disconnect();
-      io.disconnect();
+      tweens.forEach((t) => t.kill());
+      tweens.clear();
       stage.removeEventListener("pointermove", onMove);
       stage.removeEventListener("pointerleave", onLeave);
       stage.removeEventListener("pointerdown", onDown);
     };
   }, []);
 
+  // Scene change: the old stickers peel away, the new ones slap on one after another.
   useEffect(() => {
-    renderer.current?.setMode(MODES[mode].key);
-    if (prefersReducedMotion()) renderer.current?.draw(performance.now() + 1000);
+    const scenes = stageRef.current!.querySelectorAll<HTMLElement>("[data-scene]");
+    const reduce = prefersReducedMotion();
+    const first = shown.current === null;
+    scenes.forEach((scene, i) => {
+      const pops = scene.querySelectorAll("[data-pop]");
+      if (i === mode) {
+        gsap.set(scene, { autoAlpha: 1 });
+        if (first || reduce) gsap.set(pops, { scale: 1, rotation: 0, opacity: 1 });
+        else
+          gsap.fromTo(
+            pops,
+            { scale: 0, rotation: -30, opacity: 0 },
+            { scale: 1, rotation: 0, opacity: 1, duration: 0.75, stagger: 0.07, ease: "expo.out", overwrite: true },
+          );
+      } else if (i === shown.current && !reduce) {
+        gsap.to(pops, {
+          scale: 0.4,
+          rotation: 20,
+          opacity: 0,
+          duration: 0.25,
+          stagger: 0.02,
+          ease: "power2.in",
+          overwrite: true,
+          onComplete: () => gsap.set(scene, { autoAlpha: 0 }),
+        });
+      } else {
+        gsap.set(scene, { autoAlpha: 0 });
+      }
+    });
+    shown.current = mode;
   }, [mode]);
 
   const onKey = (e: KeyboardEvent, i: number) => {
@@ -140,7 +226,7 @@ export default function Experience({ ref }: { ref?: Ref<ExperienceHandle> }) {
         <div className={s.tabs} role="tablist" aria-labelledby="experience-title">
           {MODES.map((m, i) => (
             <button
-              key={m.key}
+              key={m.word}
               id={`exp-tab-${i}`}
               type="button"
               role="tab"
@@ -169,7 +255,7 @@ export default function Experience({ ref }: { ref?: Ref<ExperienceHandle> }) {
             </button>
           ))}
         </div>
-        <p className={s.desc} key={current.key} aria-live="polite">
+        <p className={s.desc} key={current.word} aria-live="polite">
           {current.desc}
         </p>
         <p className={s.sub}>Every detail matters: the music, the environment, the production, the people and the moments in between.</p>
@@ -177,15 +263,34 @@ export default function Experience({ ref }: { ref?: Ref<ExperienceHandle> }) {
 
       <div className={s.stageWrap} data-exp-stage>
         <div ref={stageRef} className={s.stage} id="exp-stage" role="tabpanel" aria-labelledby={`exp-tab-${mode}`}>
-          <canvas ref={canvasRef} className={s.canvas} aria-hidden="true" />
-          <span className={s.spotlight} aria-hidden="true" />
+          {SCENES.map((scene, si) => (
+            <div key={si} className={s.scene} data-scene aria-hidden="true">
+              {scene.map((slot, i) => (
+                <div
+                  key={i}
+                  className={s.slot}
+                  style={{
+                    left: `${slot.x}%`,
+                    top: `${slot.y}%`,
+                    width: `min(${slot.w}cqw, ${(slot.h * slot.ar).toFixed(1)}cqh)`,
+                    ["--rot" as string]: `${slot.rot}deg`,
+                    ["--delay" as string]: `${(-i * 0.37).toFixed(2)}s`,
+                  }}
+                >
+                  <div className={s.drift} data-drift={slot.depth}>
+                    <div className={s.pop} data-pop data-kind={slot.kind}>
+                      <div className={s.lift}>
+                        <div className={s.bob}>{slot.art}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))}
           <span className={s.live}>
             <i aria-hidden="true" />
             Live from Lagos
-          </span>
-          <span className={s.hint} key={current.hint}>
-            <i aria-hidden="true" />
-            {current.hint}
           </span>
         </div>
       </div>
