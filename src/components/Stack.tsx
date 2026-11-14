@@ -74,7 +74,6 @@ export default function Stack() {
       mm.add({ mobile: "(max-width: 760px)", desktop: "(min-width: 761px)" }, (ctx) => {
         const mobile = ctx.conditions?.mobile;
         let expMode = 0;
-        let expActive = true;
 
         const tl = gsap.timeline({
           defaults: { ease: "none" },
@@ -93,11 +92,6 @@ export default function Stack() {
               if (mode !== expMode) {
                 expMode = mode;
                 experience.current?.setMode(mode);
-              }
-              const active = time < T.city + 1;
-              if (active !== expActive) {
-                expActive = active;
-                experience.current?.setActive(active);
               }
             },
           },

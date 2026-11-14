@@ -22,9 +22,9 @@ export const VALUES: { title: string; tag: string; body: string; photo?: Photo }
     body: "Everyone should have the freedom to express themselves without boundaries or expectations. A space where individuality is celebrated, differences bring us together and everyone is free to experience the moment in their own way. Come as you are, be unapologetically yourself and leave with something that stays with you.",
   },
   {
-    // No photo yet: falls back to a lilac flood until one is added.
     title: "Intentional Curation.",
     tag: "Nothing is accidental.",
+    photo: { src: "/images/value-curation.jpg", focus: "45% 40%", alt: "Mirror balls throwing red beams across a dark club" },
     body: "Every element is considered, from the atmosphere and lighting to the smallest details that shape the experience. Nothing is accidental. We believe the difference lies in the intention behind every choice and the feeling it creates.",
   },
 ];

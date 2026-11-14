@@ -1,6 +1,6 @@
 /*
-  Our philosophy, one value per screen. Each one is a full-bleed photo (or, until a photo is added, a
-  flood of brand colour) with big hopping letters, a spinning owl sticker and a tilted tag.
+  Our philosophy, one value per screen. Each one is a full-bleed photo (a value without one falls back
+  to a flood of brand colour) with big hopping letters, a spinning owl sticker and a tilted tag.
 */
 .layers {
   position: absolute;
@@ -47,15 +47,15 @@
   --ring: var(--deep);
 }
 
-/* Intentional Curation: lilac flood until its photo arrives. */
+/* Intentional Curation: mirror balls under red light. Cream and green cut through the red. */
 .v3 {
-  --bg: var(--brand);
-  --fg: #1d0533;
-  --text: #2a0b47;
-  --tag-bg: var(--night);
-  --tag-fg: var(--green);
-  --sticker-bg: #1d0533;
-  --sticker-ink: var(--brand);
+  --bg: #140405;
+  --fg: var(--ink);
+  --text: #f6ebe6;
+  --tag-bg: var(--green);
+  --tag-fg: var(--night);
+  --sticker-bg: var(--ink);
+  --sticker-ink: var(--deep);
   --ring: var(--deep);
 }
 

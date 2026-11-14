@@ -27,9 +27,9 @@ npm run build && npm start
 | Blinking owl | Eyelids drawn over the owl artwork blink every few seconds, sometimes twice: hero/header badge, poster, values sticker and loader. Eye positions are in `OWL_EYES`. | `src/components/Blink.tsx` |
 | Purple strip | Endless marquee. It always drifts, speeds up when you scroll and reverses when you scroll up. | `src/components/Strip.tsx` |
 | Beyond the ordinary | The heading stays put while the copy scrolls past; when the copy runs out they leave together. The lead paragraph lights up word by word. | `src/components/Manifesto.tsx` |
-| Sound / People / Atmosphere | Full-screen scene. Scroll (or hover/tap a word) to swap the sticker sheet: a record sliding out of its sleeve and a speaker, hands up with a phone out, a mirror ball and lightning. Stickers nod to the beat, drift with the cursor, lift on hover and each does its own thing when tapped. | `src/components/Experience.tsx`, `src/components/Stickers.tsx` |
+| Sound / People / Atmosphere | Full-screen scene. Scroll (or hover/tap a word) to change the photo: it fades up with a slow push-in and drifts gently against the cursor. | `src/components/Experience.tsx` |
 | The city | THE NIGHT / IS CALLING slide out over the poster's edges and break up into grain where they cross the artwork. | `src/components/Stack.tsx` |
-| Our philosophy | Originality, Freedom of Expression and Intentional Curation each flood the screen in a brand colour (deep purple, green, lilac), wiping in from a spinning owl sticker. Letters hop under the cursor, the sticker speeds up and drifts toward you, the tags wiggle. | `src/components/Values.tsx` |
+| Our philosophy | Originality, Freedom of Expression and Intentional Curation each fill the screen with a photo, wiping in from a spinning owl sticker as the photo settles from a slow push-in. Letters hop under the cursor, the sticker speeds up and drifts toward you, the photo drifts the other way, the tags wiggle. | `src/components/Values.tsx` |
 | Sign-up | Covers the values; lines rise in, the glow breathes. | `src/components/Stack.tsx` |
 | Footer | Scrolls in after the stage releases. | `src/components/Footer.tsx` |
 
@@ -73,9 +73,8 @@ Everything in `public/images` except the photos was exported from the Figma file
 strip owl, loader owl, poster, and the six flip-card shapes (`flip-1.svg` to `flip-6.svg`).
 
 Photos: `exp-sound.jpg`, `exp-people.jpg`, `exp-atmosphere.jpg` (Experience stage), `value-originality.jpg` (the
-bridge poster with its title, logo and carousel marks retouched out) and `value-freedom.jpg` (app icons cropped off).
-Intentional Curation has no photo yet; add one to `VALUES` in `src/components/Values.tsx` and it switches from the
-lilac background to the photo automatically.
+bridge poster with its title, logo and carousel marks retouched out), `value-freedom.jpg` (app icons cropped off) and
+`value-curation.jpg`. A value without a `photo` in `VALUES` (`src/components/Values.tsx`) falls back to a colour flood.
 
 The photos were upscaled 2 to 4 times with Real-ESRGAN (`realesr-general-x4v3`), then blended with a share of the
 original so grain and skin stay natural. `scripts/upscale.py` runs the model without PyTorch (ONNX Runtime), so new

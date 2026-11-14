@@ -163,7 +163,7 @@
   min-width: 0;
 }
 
-/* The sticker sheet: a flat near-black card, no glow, stickers laid out in % of the card. */
+/* The photo card: rounded, flat, no glow. */
 .stage {
   --r: 36px;
   position: relative;
@@ -171,9 +171,6 @@
   border-radius: var(--r);
   overflow: hidden;
   background: #08070e;
-  container-type: size;
-  touch-action: manipulation;
-  user-select: none;
 }
 
 /* Photos bleed a little past the card so the cursor parallax never shows an edge. */
@@ -191,67 +188,6 @@
 
 .photo img {
   object-fit: cover;
-}
-
-/* A light vignette top and bottom so the white sticker edges read against bright photos. */
-.shade {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  background: linear-gradient(180deg, rgb(8 7 14 / 0.4) 0%, rgb(8 7 14 / 0) 28%, rgb(8 7 14 / 0) 60%, rgb(8 7 14 / 0.55) 100%);
-  pointer-events: none;
-}
-
-.scene {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-}
-
-/* Each sticker is four nested layers so the motions never fight:
-   slot (place + tilt, CSS) > drift (parallax, GSAP) > pop (enter + tap reactions, GSAP) > lift (hover, CSS) > bob (beat, CSS). */
-.slot {
-  position: absolute;
-  transform: translate(-50%, -50%) rotate(var(--rot, 0deg));
-}
-
-.pop {
-  cursor: pointer;
-  will-change: transform;
-}
-
-.lift {
-  transition: transform 0.45s var(--ease-out);
-}
-
-.slot:hover .lift {
-  transform: translateY(-5%) scale(1.08) rotate(-4deg);
-  transition-duration: 0.3s;
-}
-
-/* Every sticker nods along at 124 bpm, each a little out of step with the next. */
-.bob {
-  animation: bob 0.968s ease-in-out infinite alternate;
-  animation-delay: var(--delay, 0s);
-}
-
-@keyframes bob {
-  from {
-    transform: translateY(0) rotate(0deg);
-  }
-  to {
-    transform: translateY(-3%) rotate(1.5deg);
-  }
-}
-
-.bob svg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.stage[data-paused] .bob {
-  animation-play-state: paused;
 }
 
 @media (max-width: 860px) {
@@ -311,12 +247,7 @@
 @media (prefers-reduced-motion: reduce) {
   .ch,
   .eq i,
-  .desc,
-  .bob {
+  .desc {
     animation: none !important;
-  }
-
-  .lift {
-    transition: none;
   }
 }
