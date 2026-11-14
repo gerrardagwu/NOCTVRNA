@@ -28,13 +28,14 @@ npm run build && npm start
 | Purple strip | Endless marquee. It always drifts, speeds up when you scroll and reverses when you scroll up. | `src/components/Strip.tsx` |
 | Beyond the ordinary | The heading stays put while the copy scrolls past; when the copy runs out they leave together. The lead paragraph lights up word by word. | `src/components/Manifesto.tsx` |
 | Sound / People / Atmosphere | Full-screen scene. Scroll (or hover/tap a word) to change the photo: it fades up with a slow push-in and drifts gently against the cursor. | `src/components/Experience.tsx` |
-| The city | THE NIGHT / IS CALLING slide out over the poster's edges and break up into grain where they cross the artwork. | `src/components/Stack.tsx` |
+| The city | A normal section with a large poster. THE NIGHT / IS CALLING slide out over the poster's edges and break up into grain where they cross the artwork. | `src/components/Stack.tsx` |
 | Our philosophy | Originality, Freedom of Expression and Intentional Curation each fill the screen with a photo, wiping in from a spinning owl sticker as the photo settles from a slow push-in. Letters hop under the cursor, the sticker speeds up and drifts toward you, the photo drifts the other way, the tags wiggle. | `src/components/Values.tsx` |
 | Sign-up | Covers the values; lines rise in, the glow breathes. | `src/components/Stack.tsx` |
 | Footer | Scrolls in after the stage releases. | `src/components/Footer.tsx` |
 
-Everything from Sound / People / Atmosphere to the sign-up is one pinned stage (`src/components/Stack.tsx`); the `T`
-table at the top of that file sets where each scene starts on the scroll.
+After the manifesto (`src/components/Stack.tsx`): the Experience scene is pinned full-screen while scroll walks its
+three photos; the city section is as tall as its content and slides up over it, then holds while the values stage
+(pinned full-screen) slides up over the city. `EXP` and `VAL` at the top of that file set where each beat falls.
 
 All motion respects `prefers-reduced-motion`.
 

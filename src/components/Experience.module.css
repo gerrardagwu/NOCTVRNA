@@ -165,7 +165,7 @@
 
 /* The photo card: rounded, flat, no glow. */
 .stage {
-  --r: 36px;
+  --r: 14px;
   position: relative;
   height: min(68svh, 640px);
   border-radius: var(--r);
@@ -237,7 +237,7 @@
   }
 
   .stage {
-    --r: 28px;
+    --r: 12px;
     height: 100%;
     min-height: 240px;
   }

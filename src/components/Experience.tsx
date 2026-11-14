@@ -16,17 +16,14 @@ const MODES = [
   {
     word: "Sound.",
     desc: "Carefully curated DJ sets and selected live performances, from emerging and established talent across electronic music and contemporary sounds.",
-    color: "#c38bef",
   },
   {
     word: "People.",
     desc: "Music lovers, tastemakers and creatives. A room full of people who came for the same reason you did.",
-    color: "#edc1fc",
   },
   {
     word: "Atmosphere.",
     desc: "Immersive production and a distinct visual identity for every edition. Nothing here is accidental.",
-    color: "#55ff00",
   },
 ];
 
@@ -94,7 +91,7 @@ export default function Experience({ ref }: { ref?: Ref<ExperienceHandle> }) {
   const current = MODES[mode];
 
   return (
-    <div className={s.inner} data-inner style={{ ["--c" as string]: current.color }}>
+    <div className={s.inner} data-inner>
       <div className={s.copy}>
         <p className={s.eyebrow}>The Experience</p>
         <h2 className="sr-only" id="experience-title">

@@ -1,9 +1,19 @@
-/* One pinned, full-screen stage. Scenes are stacked; later scenes slide up over earlier ones. */
-.stack {
+/* Two pinned full-screen stages (Experience; values and sign-up) with the city as a normal section between. */
+.stage {
   position: relative;
   height: 100svh;
   overflow: hidden;
-  background: var(--loader);
+}
+
+.expStage {
+  z-index: 1;
+  background: var(--night);
+}
+
+.valStage {
+  z-index: 3;
+  background: var(--void);
+  box-shadow: 0 -40px 80px rgb(0 0 0 / 0.55);
 }
 
 .panel {
@@ -12,35 +22,32 @@
   overflow: hidden;
 }
 
-/* GSAP parks these one screen down (yPercent: 100) and slides them up; no CSS transform here,
-   or the two offsets would add up. */
-.city,
-.values,
-.enter {
+.experience {
+  background: var(--night);
+}
+
+/* ---------- The city never really sleeps: as tall as its content, poster up front ---------- */
+.cityWrap {
+  position: relative;
+  z-index: 2;
+}
+
+.city {
+  position: relative;
+  background: var(--night);
   box-shadow: 0 -40px 80px rgb(0 0 0 / 0.55);
 }
 
-.experience {
-  z-index: 1;
-  background: var(--night);
-}
-
-/* ---------- The city never really sleeps (Figma "Frame 3", 1440 x 1042) ---------- */
-.city {
-  z-index: 2;
-  background: var(--night);
-}
-
 .cityInner {
-  --u: min(calc(100vw / 1440), calc((100svh - var(--header-h)) / 990));
-  position: absolute;
-  inset: var(--header-h) 0 0 0;
+  /* Poster width; the two words around it scale with it. */
+  --pw: clamp(300px, 40vw, 600px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: calc(83 * var(--u));
+  gap: clamp(48px, 7vh, 80px);
+  padding: calc(var(--header-h) + clamp(48px, 9vh, 104px)) 0 clamp(80px, 12vh, 140px);
   perspective: 1200px;
+  transform-origin: 50% 100%;
 }
 
 /* Same tracking and leading as the other big Anton headings, and the same 6vw content edges, so it
@@ -49,7 +56,7 @@
   width: min(1240px, calc(100% - max(48px, 12vw)));
   font-family: var(--font-anton), sans-serif;
   font-weight: 400;
-  font-size: clamp(32px, min(4.6vw, 7.6svh), 78px);
+  font-size: clamp(32px, 4.6vw, 78px);
   line-height: 1;
   letter-spacing: -0.02em;
   text-align: center;
@@ -63,8 +70,8 @@
 
 .posterArea {
   position: relative;
-  width: calc(458 * var(--u));
-  height: calc(537 * var(--u));
+  width: var(--pw);
+  aspect-ratio: 458 / 537;
   max-width: 100%;
 }
 
@@ -72,7 +79,7 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-  box-shadow: 0 calc(4 * var(--u)) calc(50 * var(--u)) rgb(232 182 249 / 0.25);
+  box-shadow: 0 4px 60px rgb(232 182 249 / 0.25);
   transform-origin: 50% 100%;
   overflow: hidden;
 }
@@ -92,17 +99,18 @@
 }
 
 /*
-  "THE NIGHT" and "IS CALLING" sit over the poster's edges, 170 design px either side of centre.
-  Where a word crosses the artwork it breaks up into grain and screens into the image (the "HT" and
-  "IS" in the design): a fading mask hands over to a speckled one across the overlap.
+  "THE NIGHT" and "IS CALLING" sit over the poster's edges, placed in proportion to the poster as in
+  the design (centre offset 170/458 of its width, 199/537 down, type 70/458 of its width). Where a word
+  crosses the artwork it breaks up into grain and screens into the image: a fading mask hands over to a
+  speckled one across the overlap.
 */
 .night {
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 3.4 -1.45'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
   position: absolute;
-  top: calc(199 * var(--u));
+  top: calc(var(--pw) * 0.4345);
   z-index: 2;
   font-family: var(--font-neuvorte), serif;
-  font-size: calc(70 * var(--u));
+  font-size: calc(var(--pw) * 0.1528);
   line-height: 1.43;
   letter-spacing: -0.04em;
   color: var(--neon);
@@ -118,27 +126,27 @@
 }
 
 .nightLeft {
-  right: calc(50% + 170 * var(--u));
+  right: calc(50% + var(--pw) * 0.3712);
   mask-image: linear-gradient(to right, #000 70%, transparent 94%), var(--grain);
   -webkit-mask-image: linear-gradient(to right, #000 70%, transparent 94%), var(--grain);
 }
 
 .nightRight {
-  left: calc(50% + 170 * var(--u));
+  left: calc(50% + var(--pw) * 0.3712);
   mask-image: linear-gradient(to left, #000 74%, transparent 95%), var(--grain);
   -webkit-mask-image: linear-gradient(to left, #000 74%, transparent 95%), var(--grain);
 }
 
-/* ---------- Values: colour floods, see Values.module.css ---------- */
+/* ---------- Values: photo scenes, see Values.module.css ---------- */
 .values {
-  z-index: 3;
   background: var(--deep);
 }
 
 /* ---------- Enter a different state of night (Figma "Frame 9") ---------- */
 .enter {
-  z-index: 4;
+  z-index: 1;
   background: var(--void);
+  box-shadow: 0 -40px 80px rgb(0 0 0 / 0.55);
 }
 
 .glow {
@@ -287,8 +295,8 @@
 
 @media (max-width: 760px) {
   .cityInner {
-    --u: min(calc(100vw / 620), calc((100svh - var(--header-h)) / 1000));
-    gap: 56px;
+    --pw: min(80vw, 380px);
+    gap: 64px;
   }
 
   .headline {
@@ -296,7 +304,6 @@
   }
 
   .night {
-    z-index: 2;
     top: auto;
     font-size: 34px;
     line-height: 1.2;

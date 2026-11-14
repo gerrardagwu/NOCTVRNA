@@ -26,7 +26,7 @@
   border-radius: 0;
   cursor: pointer;
   pointer-events: auto;
-  background: rgb(9 9 9 / 0.92);
+  background: var(--void); /* solid: content scrolls under the header now */
   border-bottom: 0.5px solid var(--deep);
   opacity: 0;
   visibility: hidden;
