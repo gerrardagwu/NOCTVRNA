@@ -176,7 +176,9 @@ export default function Hero({ play }: { play: boolean }) {
   return (
     <div ref={root} className={s.root}>
       <div className={s.layer}>
-        <div className={s.bar} data-bar />
+        {/* The whole header bar is a back-to-top button. The owl and timer sit on it without catching
+            clicks, so tapping them lands here too; the logo is its own link to the same place. */}
+        <button type="button" className={s.bar} data-bar onClick={scrollToTop} aria-label="Back to top" />
         <div className={s.stage}>
           <div className={s.owl} data-owl>
             <div data-intro className={s.owlInner}>

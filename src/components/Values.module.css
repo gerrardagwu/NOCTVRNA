@@ -63,7 +63,6 @@
   gap: 12px;
 }
 
-.pill,
 .count {
   display: inline-flex;
   align-items: center;
@@ -72,11 +71,6 @@
   font-size: 14px;
   font-weight: 700;
   letter-spacing: -0.01em;
-}
-
-.pill {
-  background: var(--fg);
-  color: var(--bg);
 }
 
 .count {

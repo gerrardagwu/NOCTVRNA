@@ -217,7 +217,6 @@ export default function Experience({ ref }: { ref?: Ref<ExperienceHandle> }) {
 
   return (
     <div className={s.inner} data-inner style={{ ["--c" as string]: current.color }}>
-      <div className={s.spot} aria-hidden="true" />
       <div className={s.copy}>
         <p className={s.eyebrow}>The Experience</p>
         <h2 className="sr-only" id="experience-title">
@@ -288,10 +287,6 @@ export default function Experience({ ref }: { ref?: Ref<ExperienceHandle> }) {
               ))}
             </div>
           ))}
-          <span className={s.live}>
-            <i aria-hidden="true" />
-            Live from Lagos
-          </span>
         </div>
       </div>
     </div>

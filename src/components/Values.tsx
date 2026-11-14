@@ -84,7 +84,6 @@ export default function Values() {
         <article key={v.title} className={`${s.layer} ${s[`v${i + 1}`]}`} data-vlayer aria-labelledby={`value-${i}`}>
           <div className={s.grid}>
             <div className={s.top}>
-              <span className={s.pill}>Our philosophy</span>
               <span className={s.count} aria-label={`Value ${i + 1} of ${VALUES.length}`}>
                 {String(i + 1).padStart(2, "0")}
                 <span aria-hidden="true"> / 03</span>

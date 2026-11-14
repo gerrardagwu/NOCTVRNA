@@ -8,23 +8,6 @@
   align-items: center;
   gap: clamp(28px, 5vw, 88px);
   padding: clamp(20px, 4svh, 48px) max(24px, 6vw);
-  isolation: isolate;
-}
-
-/* A big soft spotlight behind everything, tinted by the current scene. */
-.spot {
-  position: absolute;
-  z-index: -1;
-  right: -10vw;
-  top: 50%;
-  width: 80vw;
-  height: 80vw;
-  max-height: 140svh;
-  transform: translateY(-50%);
-  border-radius: 50%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--c) 30%, transparent) 0%, transparent 60%);
-  transition: background 0.8s var(--ease-out);
-  pointer-events: none;
 }
 
 .copy {
@@ -240,44 +223,8 @@
   height: auto;
 }
 
-.stage[data-paused] .bob,
-.stage[data-paused] .live i {
+.stage[data-paused] .bob {
   animation-play-state: paused;
-}
-
-.live {
-  position: absolute;
-  top: 18px;
-  left: 18px;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 16px;
-  border-radius: 999px;
-  background: rgb(245 241 229 / 0.08);
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--ink);
-  pointer-events: none;
-}
-
-.live i {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 0 0 rgb(85 255 0 / 0.6);
-  animation: ping 1.6s var(--ease-out) infinite;
-}
-
-@keyframes ping {
-  70% {
-    box-shadow: 0 0 0 10px rgb(85 255 0 / 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgb(85 255 0 / 0);
-  }
 }
 
 @media (max-width: 860px) {
@@ -332,18 +279,11 @@
     min-height: 240px;
   }
 
-  .live {
-    top: 12px;
-    left: 12px;
-    padding: 8px 12px;
-    font-size: 12px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .ch,
   .eq i,
-  .live i,
   .desc,
   .bob {
     animation: none !important;

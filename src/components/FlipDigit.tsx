@@ -7,9 +7,11 @@ import s from "./Countdown.module.css";
 export type FlipDigitHandle = {
   /** Show `n`. With `cascade`, run through every digit on the way like a calendar being thumbed open. */
   set: (n: number, cascade?: boolean) => void;
+  /** Show `n` immediately, dropping any flips in progress or waiting. */
+  snap: (n: number) => void;
 };
 
-type Step = { value: number; duration: number };
+type Step = { value: number; duration: number; cascade: boolean };
 
 /**
  * One split-flap card. The card art is the Figma "Subtract" shape; each half is the same full card
@@ -29,6 +31,7 @@ export default function FlipDigit({ ref, art }: { ref?: Ref<FlipDigitHandle>; ar
   const target = useRef(0);
   const queue = useRef<Step[]>([]);
   const busy = useRef(false);
+  const running = useRef<gsap.core.Timeline | null>(null);
 
   useImperativeHandle(
     ref,
@@ -53,7 +56,7 @@ export default function FlipDigit({ ref, art }: { ref?: Ref<FlipDigitHandle>; ar
         write(bottom.current, to);
         write(back.current, to);
 
-        gsap
+        running.current = gsap
           .timeline({
             onComplete: () => {
               shown.current = to;
@@ -61,6 +64,7 @@ export default function FlipDigit({ ref, art }: { ref?: Ref<FlipDigitHandle>; ar
               write(front.current, to);
               gsap.set(flap.current, { rotateX: 0 });
               gsap.set([frontShade.current, backShade.current], { opacity: 0 });
+              running.current = null;
               next();
             },
           })
@@ -69,9 +73,25 @@ export default function FlipDigit({ ref, art }: { ref?: Ref<FlipDigitHandle>; ar
           .fromTo(backShade.current, { opacity: 0.55 }, { opacity: 0, duration: d / 2, ease: "none" }, d / 2);
       };
 
+      const snap = (n: number) => {
+        running.current?.kill();
+        running.current = null;
+        queue.current = [];
+        busy.current = false;
+        shown.current = target.current = n;
+        [top, bottom, front, back].forEach((r) => write(r.current, n));
+        gsap.set(flap.current, { rotateX: 0 });
+        gsap.set([frontShade.current, backShade.current], { opacity: 0 });
+      };
+
       return {
+        snap,
         set(n, cascade = false) {
           if (n === target.current) return;
+          // A hidden tab doesn't run animations, so flips would pile up and play late. Just show the value.
+          if (document.hidden) return snap(n);
+          // A newer tick replaces any plain flip still waiting, so the card never falls behind the clock.
+          queue.current = queue.current.filter((step) => step.cascade);
           const values: number[] = [];
           if (cascade) {
             let v = target.current;
@@ -87,7 +107,7 @@ export default function FlipDigit({ ref, art }: { ref?: Ref<FlipDigitHandle>; ar
           values.forEach((value, i) => {
             // Thumb quickly through the middle of the run, then land on the real digit with weight.
             const duration = !cascade ? 0.55 : i === last ? 0.6 : Math.max(0.07, 0.16 - i * 0.012);
-            queue.current.push({ value, duration });
+            queue.current.push({ value, duration, cascade });
           });
           if (!busy.current) next();
         },

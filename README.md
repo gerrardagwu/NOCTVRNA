@@ -20,10 +20,10 @@ npm run build && npm start
 
 | Section | Behaviour | File |
 | --- | --- | --- |
-| Loader | The owl from the Figma "Loader" frame fades up and blinks slowly while fonts and images load, then closes its eyes one last time and the page opens on that blink. | `src/components/Loader.tsx` |
+| Loader | The owl from the Figma "Loader" frame fades up, its eyes glow, and it lifts once fonts and images are in. | `src/components/Loader.tsx` |
 | Hero | Full screen. The NOCTVRNA logo switches on like a tube light catching (flicker, then a steady glow with a faint hum), and the city lights up behind it. | `src/components/Hero.tsx` |
-| Countdown | Live split-flap countdown to 12 December 2026 (days, hours, minutes, seconds). The cards swing open, cascade through the digits like a calendar, then every tick lifts the bottom flap up and over. | `src/components/FlipDigit.tsx`, `Countdown.tsx` |
-| Header | As the hero scrolls away, the owl, the logo and the countdown shrink into a sticky header. Desktop: logo left, owl centred, countdown right. Mobile: owl far left with the logo beside it, countdown right. Scroll back up and they grow back. | `src/components/Hero.tsx` |
+| Countdown | Live split-flap countdown to 12 December 2026 (days, hours, minutes, seconds). The cards swing open, cascade through the digits like a calendar, then every tick lifts the bottom flap up and over. Each tick is scheduled for the moment the second changes and read fresh from the clock, which is corrected against the server's time (`/api/time`), so a phone set to the wrong time still counts down correctly. Coming back to a background tab jumps straight to the right time. | `src/components/FlipDigit.tsx`, `Countdown.tsx`, `src/lib/clock.ts` |
+| Header | As the hero scrolls away, the owl, the logo and the countdown shrink into a sticky header. Desktop: logo left, owl centred, countdown right. Mobile: owl far left with the logo beside it, countdown right. Clicking anywhere in the header scrolls back to the top. | `src/components/Hero.tsx` |
 | Blinking owl | Eyelids drawn over the owl artwork blink every few seconds, sometimes twice: hero/header badge, poster, values sticker and loader. Eye positions are in `OWL_EYES`. | `src/components/Blink.tsx` |
 | Purple strip | Endless marquee. It always drifts, speeds up when you scroll and reverses when you scroll up. | `src/components/Strip.tsx` |
 | Beyond the ordinary | The heading stays put while the copy scrolls past; when the copy runs out they leave together. The lead paragraph lights up word by word. | `src/components/Manifesto.tsx` |
@@ -62,7 +62,10 @@ All motion respects `prefers-reduced-motion`.
 3. **Countdown target** is 12 December 2026, 00:00 Lagos time (`EVENT_TIME` in `src/components/Countdown.tsx`).
    Change it there if doors have a set time.
 
-4. Add `metadataBase` in `src/app/layout.tsx` once the domain is known, so social previews use absolute URLs.
+4. **Hosting.** The countdown's clock check uses the `/api/time` route, so deploy somewhere that runs Next.js server
+   routes (Vercel does by default). On a purely static host it falls back to the visitor's device clock.
+
+5. Add `metadataBase` in `src/app/layout.tsx` once the domain is known, so social previews use absolute URLs.
 
 ## Assets
 
