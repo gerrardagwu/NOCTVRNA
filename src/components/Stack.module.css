@@ -254,7 +254,8 @@
 
 @media (max-width: 760px) {
   .cityInner {
-    --pw: min(64vw, 304px);
+    /* As wide as the headline above it: the screen less the same side margins. */
+    --pw: calc(100% - max(48px, 12vw));
     gap: 64px;
   }
 

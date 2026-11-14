@@ -34,6 +34,121 @@
   visibility: hidden;
 }
 
+/* The countdown's tab, hanging just below the header on the right. Sized from JS to the shrunken timer. */
+.cdTab {
+  position: absolute;
+  top: var(--header-h);
+  right: 32px;
+  background: rgb(9 9 9 / 0.7);
+  backdrop-filter: blur(14px) saturate(1.2);
+  border: 0.5px solid var(--deep);
+  border-top: 0;
+  border-radius: 0 0 10px 10px;
+  opacity: 0;
+  visibility: hidden;
+}
+
+/*
+  Get Access, as an admission ticket: a green main part and a tear-off stub split by a perforated line,
+  with a half-moon bite out of each end and at the top and bottom of the perforation. Each part is
+  masked in four quarters, one bite per quarter, so no mask compositing is needed.
+*/
+.ticket {
+  --t-h: 42px;
+  --bite: 6px;
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  position: absolute;
+  top: calc((var(--header-h) - var(--t-h)) / 2);
+  right: 32px;
+  display: flex;
+  height: var(--t-h);
+  color: var(--night);
+  text-decoration: none;
+  pointer-events: auto;
+  filter: drop-shadow(0 8px 20px rgb(85 255 0 / 0.16));
+  transition: transform 0.45s var(--ease-out), filter 0.45s var(--ease-out);
+}
+
+.ticketMain,
+.ticketStub {
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: var(--grain), var(--green);
+  mask-repeat: no-repeat;
+  mask-size: 50.5% 50.5%;
+  mask-position: left top, right top, left bottom, right bottom;
+}
+
+.ticketMain {
+  padding: 0 16px 0 20px;
+  border-radius: 5px 0 0 5px;
+  font-family: var(--font-anton), sans-serif;
+  font-size: 16px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  mask-image:
+    radial-gradient(circle at 0 100%, transparent var(--bite), #000 calc(var(--bite) + 0.5px)),
+    radial-gradient(circle at 100% 0, transparent calc(var(--bite) - 1px), #000 calc(var(--bite) - 0.5px)),
+    radial-gradient(circle at 0 0, transparent var(--bite), #000 calc(var(--bite) + 0.5px)),
+    radial-gradient(circle at 100% 100%, transparent calc(var(--bite) - 1px), #000 calc(var(--bite) - 0.5px));
+}
+
+/* A light sweep across the face on hover, like foil catching the light. */
+.ticketMain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.55) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform 0.7s var(--ease-out);
+}
+
+.ticketStub {
+  padding: 0 13px 0 12px;
+  border-radius: 0 5px 5px 0;
+  background-image: var(--grain), repeating-linear-gradient(180deg, rgb(14 11 18 / 0.5) 0 4px, transparent 4px 8px);
+  background-size: auto, 2px 100%;
+  background-position: 0 0, left center;
+  background-repeat: repeat, no-repeat;
+  background-color: var(--green);
+  mask-image:
+    radial-gradient(circle at 0 0, transparent calc(var(--bite) - 1px), #000 calc(var(--bite) - 0.5px)),
+    radial-gradient(circle at 100% 100%, transparent var(--bite), #000 calc(var(--bite) + 0.5px)),
+    radial-gradient(circle at 0 100%, transparent calc(var(--bite) - 1px), #000 calc(var(--bite) - 0.5px)),
+    radial-gradient(circle at 100% 0, transparent var(--bite), #000 calc(var(--bite) + 0.5px));
+}
+
+.ticketStub svg {
+  display: block;
+  transition: transform 0.45s var(--ease-out);
+}
+
+.ticket:hover {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 12px 26px rgb(85 255 0 / 0.3));
+}
+
+.ticket:hover .ticketMain::after {
+  transform: translateX(120%);
+}
+
+.ticket:hover .ticketStub svg {
+  transform: translateX(3px);
+}
+
+.ticket:active {
+  transform: translateY(0) scale(0.97);
+  transition-duration: 0.12s;
+}
+
+.ticket:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 4px;
+}
+
 .stage {
   --u: min(calc(100vw / 1440), calc(var(--hero-h) / 735));
   position: absolute;
@@ -43,12 +158,14 @@
   height: calc(735 * var(--u));
 }
 
+/* A wide band of the owl's face (from the poster), feathered at every edge so it melts into the night
+   behind the logo rather than sitting in a badge. */
 .owl {
   position: absolute;
-  left: calc(50% - 44 * var(--u));
-  top: calc(32 * var(--u));
-  width: calc(88 * var(--u));
-  height: calc(88 * var(--u));
+  left: calc(50% - 230 * var(--u));
+  top: calc(-38 * var(--u));
+  width: calc(460 * var(--u));
+  aspect-ratio: 1024 / 390;
   transform-origin: 0 0;
   will-change: transform;
 }
@@ -57,11 +174,14 @@
   position: relative;
   width: 100%;
   height: 100%;
+  mask-image:
+    linear-gradient(90deg, transparent 0%, #000 9%, #000 91%, transparent 100%),
+    linear-gradient(180deg, transparent 0%, #000 22%, #000 60%, transparent 100%);
+  mask-composite: intersect;
 }
 
 .owlInner img {
-  width: 100%;
-  height: 100%;
+  object-fit: cover;
 }
 
 .logo {
@@ -193,21 +313,20 @@
   }
 
   .owl {
-    top: 12%;
-    left: calc(50% - 32px);
-    width: 64px;
-    height: 64px;
+    top: 9%;
+    left: 12vw;
+    width: 76vw;
   }
 
   .logo {
-    top: calc(12% + 84px);
+    top: calc(9% + 25vw);
     left: 4vw;
     width: 92vw;
     height: calc(92vw / 2.714);
   }
 
   .caption {
-    top: calc(12% + 92px + 33.9vw);
+    top: calc(9% + 59vw + 8px);
     gap: 4px;
   }
 
@@ -235,6 +354,30 @@
 
   .cdWrap > * {
     --cu: var(--cdu);
+  }
+
+  .cdTab {
+    right: 16px;
+  }
+
+  .ticket {
+    --t-h: 34px;
+    --bite: 5px;
+    right: 16px;
+  }
+
+  .ticketMain {
+    padding: 0 11px 0 14px;
+    font-size: 13px;
+  }
+
+  .ticketStub {
+    padding: 0 9px 0 8px;
+  }
+
+  .ticketStub svg {
+    width: 13px;
+    height: 13px;
   }
 }
 

@@ -39,18 +39,19 @@ export default function Manifesto() {
         scrollTrigger: { trigger: q("[data-lead]")[0], start: "top 78%", end: "bottom 42%", scrub: 0.6 },
       });
 
-      gsap.from(q("[data-body] p"), {
-        y: 40,
-        opacity: 0,
-        duration: 1,
-        stagger: 0.15,
-        ease: "power3.out",
-        scrollTrigger: { trigger: q("[data-body]")[0], start: "top 85%" },
+      // The two paragraphs under it sit in grey and light up the same way as you read on.
+      const body = SplitText.create(q("[data-body] p"), { type: "words" });
+      gsap.from(body.words, {
+        color: "#4a4552",
+        stagger: 0.1,
+        ease: "none",
+        scrollTrigger: { trigger: q("[data-body]")[0], start: "top 80%", end: "bottom 50%", scrub: 0.6 },
       });
 
       return () => {
         heading.revert();
         lead.revert();
+        body.revert();
       };
     },
     { scope: root, dependencies: [fontsReady] },

@@ -62,7 +62,7 @@ export default function Stack() {
           .timeline()
           .from(layer.querySelectorAll("[data-vchar]"), { yPercent: 110, rotate: 12, opacity: 0, stagger: 0.02, duration: 0.55, ease: "expo.out" })
           .from(layer.querySelector("[data-vsticker]"), { scale: 0.3, rotate: -140, opacity: 0, duration: 0.7, ease: "expo.out" }, 0.05)
-          .from(layer.querySelector("[data-vtag]"), { scale: 0, rotate: -35, duration: 0.5, ease: "expo.out" }, 0.3)
+          .from(layer.querySelector("[data-vtag]"), { scale: 0, duration: 0.5, ease: "expo.out" }, 0.3)
           .from(layer.querySelector("[data-vbody]"), { y: 30, opacity: 0, duration: 0.5, ease: "power2.out" }, 0.35);
 
       // Each value's photo settles from a slow push-in while its scene arrives.
@@ -107,16 +107,22 @@ export default function Stack() {
           { yPercent: 14, scale: 0.88, rotateX: 14 },
           { yPercent: 0, scale: 1, rotateX: 0, ease: "power2.out", scrollTrigger: { trigger: q("[data-poster-area]")[0], start: "top bottom", end: "top 35%", scrub: 0.6 } },
         );
-        // ...then it holds while the values slide over it. It only holds once the section has reached the top
-        // of the screen, and (on short screens) has scrolled just far enough to show the whole poster, so the
-        // headline and poster are never covered while still part-way down the screen.
+        // ...then it holds while the values slide over it. It only holds once the section has reached the top of
+        // the screen; where the poster runs past the bottom it scrolls on to show it, but never so far that the
+        // headline slips under the header. So the headline and poster are never covered part-way down the screen.
         const posterArea = q("[data-poster-area]")[0] as HTMLElement;
-        const posterBottom = () => posterArea.offsetTop + posterArea.offsetHeight + 16; // within the city section
+        const headlineEl = q("[data-city-headline]")[0] as HTMLElement;
+        const headerH = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-h")) || 76;
+        const holdOffset = () => {
+          const showPoster = posterArea.offsetTop + posterArea.offsetHeight + 16 - vh();
+          const keepHeadline = headlineEl.offsetTop - headerH() - 8;
+          return Math.max(0, Math.min(showPoster, keepHeadline));
+        };
         gsap
           .timeline({
             scrollTrigger: {
               trigger: city,
-              start: () => `top+=${Math.max(0, posterBottom() - vh())} top`,
+              start: () => `top+=${holdOffset()} top`,
               end: () => `+=${vh()}`,
               pin: true,
               pinSpacing: false,
@@ -137,6 +143,7 @@ export default function Stack() {
           .timeline({
             defaults: { ease: "none" },
             scrollTrigger: {
+              id: "values-stage", // the Get Access ticket scrolls to the end of this pin
               trigger: valStage,
               start: "top top",
               end: () => `+=${vh() * 4.2}`,

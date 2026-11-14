@@ -26,7 +26,6 @@
   font-weight: 700;
   font-size: 15px;
   letter-spacing: -0.02em;
-  transform: rotate(-3deg);
   margin-bottom: clamp(16px, 3svh, 32px);
 }
 

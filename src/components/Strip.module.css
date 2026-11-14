@@ -4,57 +4,50 @@
   height: var(--strip-h);
   display: flex;
   align-items: center;
-  overflow: hidden;
   background: var(--brand);
   border-block: 0.5px solid var(--brand);
+  padding-left: max(24px, 4vw, env(safe-area-inset-left, 0px));
+  padding-right: max(24px, 4vw, env(safe-area-inset-right, 0px));
 }
 
-.track {
-  display: flex;
-  will-change: transform;
-}
-
-.set {
-  display: flex;
-  flex-shrink: 0;
-}
-
-.item {
+/* Words and owls share the width evenly; the type scales with the screen so all four always fit. */
+.row {
   display: flex;
   align-items: center;
-  gap: 60px;
-  padding-right: 60px;
+  justify-content: space-between;
+  width: 100%;
+  margin: 0;
+  gap: 8px;
 }
 
 .word {
   font-family: var(--font-bunch), sans-serif;
   font-weight: 700;
-  font-size: 32px;
-  line-height: 32px;
+  font-size: clamp(14px, 3.6vw, 32px);
+  line-height: 1;
   letter-spacing: -0.04em;
   color: var(--deep);
   white-space: nowrap;
 }
 
 .owl {
-  width: 40px;
-  height: 40px;
+  width: clamp(18px, 2.9vw, 40px);
+  height: auto;
+  aspect-ratio: 1;
   flex-shrink: 0;
 }
 
 @media (max-width: 760px) {
-  .item {
-    gap: 32px;
-    padding-right: 32px;
+  .strip {
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+
+  .row {
+    gap: 6px;
   }
 
   .word {
-    font-size: 24px;
-    line-height: 24px;
-  }
-
-  .owl {
-    width: 30px;
-    height: 30px;
+    font-size: clamp(12px, 3.6vw, 22px);
   }
 }
