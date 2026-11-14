@@ -293,6 +293,7 @@ export default function Experience({ ref }: { ref?: Ref<ExperienceHandle> }) {
                   alt={i === mode ? photo.alt : ""}
                   fill
                   sizes="(max-width: 860px) 100vw, 46vw"
+                  quality={85}
                   style={{ objectPosition: photo.focus }}
                 />
               </div>

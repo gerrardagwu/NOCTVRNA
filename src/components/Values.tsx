@@ -104,7 +104,7 @@ export default function Values() {
             <>
               <div className={s.photo} data-vpan>
                 <div className={s.photoZoom} data-vphoto>
-                  <Image src={v.photo.src} alt={v.photo.alt} fill sizes="100vw" style={{ objectPosition: v.photo.focus }} />
+                  <Image src={v.photo.src} alt={v.photo.alt} fill sizes="100vw" quality={85} style={{ objectPosition: v.photo.focus }} />
                 </div>
               </div>
               <div className={s.scrim} aria-hidden="true" />

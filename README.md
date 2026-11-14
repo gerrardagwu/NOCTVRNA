@@ -76,3 +76,15 @@ Photos: `exp-sound.jpg`, `exp-people.jpg`, `exp-atmosphere.jpg` (Experience stag
 bridge poster with its title, logo and carousel marks retouched out) and `value-freedom.jpg` (app icons cropped off).
 Intentional Curation has no photo yet; add one to `VALUES` in `src/components/Values.tsx` and it switches from the
 lilac background to the photo automatically.
+
+The photos were upscaled 2 to 4 times with Real-ESRGAN (`realesr-general-x4v3`), then blended with a share of the
+original so grain and skin stay natural. `scripts/upscale.py` runs the model without PyTorch (ONNX Runtime), so new
+photos can go through the same step:
+
+```bash
+pip install onnx onnxruntime pillow
+curl -LO https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-general-x4v3.pth
+python3 scripts/upscale.py realesr-general-x4v3.pth srvgg.onnx input.jpg public/images/output.jpg 2560
+```
+
+The photos are served at quality 85 (`images.qualities` in `next.config.ts`); everything else uses the default 75.
