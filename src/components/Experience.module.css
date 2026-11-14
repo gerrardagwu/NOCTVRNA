@@ -1,0 +1,366 @@
+/* Sound. People. Atmosphere. A club stage, not a dashboard: soft corners, warm light, things that move when you touch them. */
+.inner {
+  --c: var(--brand);
+  position: absolute;
+  inset: var(--header-h) 0 0 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  align-items: center;
+  gap: clamp(28px, 5vw, 88px);
+  padding: clamp(20px, 4svh, 48px) max(24px, 6vw);
+  isolation: isolate;
+}
+
+/* A big soft spotlight behind everything, tinted by the current scene. */
+.spot {
+  position: absolute;
+  z-index: -1;
+  right: -10vw;
+  top: 50%;
+  width: 80vw;
+  height: 80vw;
+  max-height: 140svh;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--c) 30%, transparent) 0%, transparent 60%);
+  transition: background 0.8s var(--ease-out);
+  pointer-events: none;
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.eyebrow {
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: var(--brand);
+  color: var(--deep);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -0.02em;
+  transform: rotate(-3deg);
+  margin-bottom: clamp(16px, 3svh, 32px);
+}
+
+.tabs {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.word {
+  display: inline-block;
+  font-family: var(--font-anton), sans-serif;
+  font-size: clamp(52px, min(6.6vw, 11svh), 112px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: rgb(237 193 252 / 0.2);
+  transition: color 0.5s var(--ease-out), transform 0.6s var(--ease-out), text-shadow 0.6s var(--ease-out);
+}
+
+.ch {
+  display: inline-block;
+}
+
+.tab:hover .word,
+.tab:focus-visible .word {
+  color: rgb(237 193 252 / 0.5);
+}
+
+/* Letters ripple up one after another when you land on a word. */
+.tab:hover .ch,
+.tab[aria-selected="true"] .ch {
+  animation: hop 0.55s var(--ease-out) both;
+  animation-delay: calc(var(--i) * 28ms);
+}
+
+@keyframes hop {
+  40% {
+    transform: translateY(-14%) rotate(-4deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+.tab[aria-selected="true"] .word {
+  color: var(--brand-soft);
+  transform: translateX(10px);
+  text-shadow: 0 0 42px color-mix(in srgb, var(--c) 55%, transparent);
+}
+
+/* Little bouncing bars next to the word that's playing. */
+.eq {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 28px;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.4s var(--ease-out), transform 0.5s var(--ease-out);
+}
+
+.eq i {
+  display: block;
+  width: 6px;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--green);
+  transform-origin: bottom;
+  animation: eq 0.9s ease-in-out infinite;
+}
+
+.eq i:nth-child(2) {
+  animation-delay: -0.3s;
+}
+
+.eq i:nth-child(3) {
+  animation-delay: -0.6s;
+}
+
+@keyframes eq {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.tab[aria-selected="true"] .eq {
+  opacity: 1;
+  transform: none;
+}
+
+.desc {
+  max-width: 44ch;
+  margin-top: clamp(16px, 3svh, 28px);
+  min-height: 3.6em;
+  font-size: clamp(17px, 1.45vw, 21px);
+  line-height: 1.45;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  animation: rise 0.6s var(--ease-out) both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+.sub {
+  max-width: 46ch;
+  margin-top: 14px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: rgb(245 241 229 / 0.55);
+}
+
+.stageWrap {
+  min-width: 0;
+}
+
+.stage {
+  --r: 36px;
+  position: relative;
+  height: min(68svh, 640px);
+  border-radius: var(--r);
+  overflow: hidden;
+  cursor: pointer;
+  background: #0b0710;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.06),
+    0 40px 100px -30px color-mix(in srgb, var(--c) 55%, transparent);
+  transition: box-shadow 0.8s var(--ease-out);
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* A soft light that follows the cursor over the stage. */
+.spotlight {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    280px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--c) 22%, transparent),
+    transparent 70%
+  );
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 0.5s var(--ease-out);
+  pointer-events: none;
+}
+
+.stage:hover .spotlight {
+  opacity: 1;
+}
+
+.live,
+.hint {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgb(14 11 18 / 0.78);
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.08);
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  pointer-events: none;
+}
+
+.live {
+  top: 18px;
+  left: 18px;
+  font-weight: 700;
+}
+
+.live i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 0 rgb(85 255 0 / 0.6);
+  animation: ping 1.6s var(--ease-out) infinite;
+}
+
+@keyframes ping {
+  70% {
+    box-shadow: 0 0 0 10px rgb(85 255 0 / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(85 255 0 / 0);
+  }
+}
+
+.hint {
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  animation: hintIn 0.6s var(--ease-out) both;
+}
+
+.hint i {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--c);
+  animation: tapHint 1.4s var(--ease-out) infinite;
+}
+
+@keyframes hintIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+}
+
+@keyframes tapHint {
+  0% {
+    transform: scale(0.6);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 860px) {
+  .inner {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: stretch;
+    gap: 18px;
+    padding: 18px 16px 20px;
+  }
+
+  .tabs {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+  }
+
+  .tab {
+    gap: 8px;
+  }
+
+  .word {
+    font-size: clamp(30px, 9vw, 44px);
+  }
+
+  .tab[aria-selected="true"] .word {
+    transform: none;
+  }
+
+  .eq {
+    display: none;
+  }
+
+  .desc {
+    min-height: 0;
+    font-size: 15px;
+    margin-top: 10px;
+  }
+
+  .sub {
+    display: none;
+  }
+
+  .eyebrow {
+    margin-bottom: 12px;
+    font-size: 13px;
+  }
+
+  .stage {
+    --r: 28px;
+    height: 100%;
+    min-height: 240px;
+  }
+
+  .hint {
+    font-size: 13px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ch,
+  .eq i,
+  .live i,
+  .hint i,
+  .desc,
+  .hint {
+    animation: none !important;
+  }
+}

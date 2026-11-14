@@ -13,14 +13,19 @@ const GROUPS = [
   { label: "Days", first: 0 },
   { label: "Hour", first: 2 },
   { label: "Minute", first: 4 },
+  { label: "Second", first: 6 },
 ] as const;
 
+// The Figma file has six card shapes (all the same outline); the seconds pair reuses the first two.
+const art = (i: number) => `/images/flip-${(i % 6) + 1}.svg`;
+
 function remaining() {
-  const minutes = Math.floor(Math.max(0, EVENT_TIME - Date.now()) / 60000);
-  const days = Math.min(99, Math.floor(minutes / 1440));
-  const hours = Math.floor((minutes % 1440) / 60);
-  const mins = minutes % 60;
-  return { days, hours, mins };
+  const seconds = Math.floor(Math.max(0, EVENT_TIME - Date.now()) / 1000);
+  const days = Math.min(99, Math.floor(seconds / 86400));
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  return { days, hours, mins, secs };
 }
 
 export default function Countdown({ ref }: { ref?: Ref<CountdownHandle> }) {
@@ -36,12 +41,12 @@ export default function Countdown({ ref }: { ref?: Ref<CountdownHandle> }) {
       start(cascade) {
         if (timer.current) return;
         const tick = (first: boolean) => {
-          const { days, hours, mins } = remaining();
-          const values = [days, hours, mins].flatMap((n) => [Math.floor(n / 10), n % 10]);
+          const { days, hours, mins, secs } = remaining();
+          const values = [days, hours, mins, secs].flatMap((n) => [Math.floor(n / 10), n % 10]);
           values.forEach((v, i) => digits.current[i]?.set(v, first && cascade));
           row.current?.setAttribute(
             "aria-label",
-            `${days} days, ${hours} hours and ${mins} minutes until 12 December 2026`,
+            `${days} days, ${hours} hours, ${mins} minutes and ${secs} seconds until 12 December 2026`,
           );
         };
         tick(true);
@@ -59,7 +64,7 @@ export default function Countdown({ ref }: { ref?: Ref<CountdownHandle> }) {
             {[first, first + 1].map((i) => (
               <FlipDigit
                 key={i}
-                art={`/images/flip-${i + 1}.svg`}
+                art={art(i)}
                 ref={(handle) => {
                   digits.current[i] = handle;
                 }}

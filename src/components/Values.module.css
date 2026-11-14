@@ -1,0 +1,256 @@
+/*
+  Our philosophy. Three full-screen colour floods from the brand palette, like the lighting changing
+  between sets: deep purple, then acid green, then lilac. Big hopping letters, a spinning owl sticker,
+  a tilted tag.
+*/
+.layers {
+  position: absolute;
+  inset: 0;
+}
+
+.layer {
+  --bg: var(--deep);
+  --fg: var(--brand-soft);
+  --text: #e9d8f6;
+  --tag-bg: var(--green);
+  --tag-fg: var(--night);
+  --ring: var(--green);
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.v1 {
+  --bg: var(--deep);
+  --fg: var(--brand-soft);
+  --text: #e9d8f6;
+  --tag-bg: var(--green);
+  --tag-fg: var(--night);
+  --ring: var(--green);
+}
+
+.v2 {
+  --bg: var(--green);
+  --fg: var(--night);
+  --text: #12200b;
+  --tag-bg: var(--deep);
+  --tag-fg: var(--brand-soft);
+  --ring: var(--deep);
+}
+
+.v3 {
+  --bg: var(--brand);
+  --fg: #1d0533;
+  --text: #2a0b47;
+  --tag-bg: var(--night);
+  --tag-fg: var(--green);
+  --ring: var(--deep);
+}
+
+.grid {
+  position: absolute;
+  inset: calc(var(--header-h) + clamp(16px, 4svh, 40px)) max(24px, 6vw) clamp(24px, 6svh, 64px);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: clamp(12px, 3svh, 32px);
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pill,
+.count {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.pill {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.count {
+  box-shadow: inset 0 0 0 1.5px var(--fg);
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+
+.count span {
+  opacity: 0.6;
+  margin-left: 0.25em;
+}
+
+.title {
+  align-self: center;
+  max-width: 11ch;
+  font-family: var(--font-anton), sans-serif;
+  font-weight: 400;
+  font-size: clamp(64px, min(12.5vw, 21svh), 230px);
+  line-height: 0.88;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+}
+
+.wordWrap {
+  display: inline-block;
+  white-space: nowrap;
+  margin-right: 0.18em;
+}
+
+/* The scroll reveal moves .chWrap; hover play moves .ch inside it, so the two never fight. */
+.chWrap {
+  display: inline-block;
+}
+
+/* Hover play: each letter hops as the cursor passes over it. */
+.ch {
+  display: inline-block;
+  transition: transform 0.5s var(--ease-out), color 0.3s var(--ease-out);
+}
+
+.ch:hover {
+  transform: translateY(-10%) rotate(-6deg) scale(1.06);
+  transition-duration: 0.18s;
+}
+
+.bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px 48px;
+  flex-wrap: wrap;
+}
+
+.tagWrap {
+  display: inline-block;
+}
+
+.tag {
+  display: inline-block;
+  padding: 12px 22px;
+  border-radius: 999px;
+  background: var(--tag-bg);
+  color: var(--tag-fg);
+  font-family: var(--font-anton), sans-serif;
+  font-size: clamp(20px, 2vw, 30px);
+  letter-spacing: 0.01em;
+  transform: rotate(-6deg);
+  box-shadow: 0 14px 34px -14px rgb(0 0 0 / 0.5);
+  cursor: default;
+}
+
+.tag:hover {
+  animation: wiggle 0.6s var(--ease-out);
+}
+
+@keyframes wiggle {
+  25% {
+    transform: rotate(4deg) scale(1.06);
+  }
+  60% {
+    transform: rotate(-9deg) scale(1.02);
+  }
+  100% {
+    transform: rotate(-6deg);
+  }
+}
+
+.body {
+  max-width: 46ch;
+  font-size: clamp(17px, 1.5vw, 22px);
+  line-height: 1.5;
+  letter-spacing: -0.02em;
+}
+
+.sticker {
+  position: absolute;
+  right: max(24px, 7vw);
+  top: calc(var(--header-h) + clamp(40px, 12svh, 140px));
+  width: clamp(120px, 13vw, 200px);
+  aspect-ratio: 1;
+}
+
+.stickerIn {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--fg);
+  box-shadow: 0 20px 50px -20px rgb(0 0 0 / 0.55);
+  cursor: pointer;
+}
+
+.ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.ring text {
+  fill: var(--bg);
+  font-family: var(--font-anton), sans-serif;
+  font-size: 19px;
+  letter-spacing: 0.06em;
+}
+
+.owl {
+  position: absolute;
+  inset: 26%;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+.owl img {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 760px) {
+  .title {
+    font-size: clamp(52px, 16vw, 96px);
+    max-width: none;
+  }
+
+  .sticker {
+    width: 96px;
+    right: 16px;
+    top: calc(var(--header-h) + 64px);
+  }
+
+  .bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .body {
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  .tag {
+    font-size: 18px;
+    padding: 10px 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ch,
+  .tag {
+    transition: none;
+    animation: none !important;
+  }
+}

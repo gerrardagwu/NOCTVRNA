@@ -16,7 +16,7 @@
 
   --header-h: 76px;
   --strip-h: 86px;
-  --hero-h: max(560px, calc(100svh - var(--strip-h)));
+  --hero-h: max(560px, 100svh);
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }

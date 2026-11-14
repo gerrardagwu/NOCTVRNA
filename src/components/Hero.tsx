@@ -4,13 +4,14 @@ import Image from "next/image";
 import { useRef, type MouseEvent } from "react";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/gsap";
 import { scrollToTop } from "@/lib/lenis";
+import Blink, { OWL_EYES } from "./Blink";
 import Countdown, { type CountdownHandle } from "./Countdown";
 import s from "./Hero.module.css";
 
-/** Header geometry the hero logo and countdown shrink into. */
+/** Header geometry the hero owl, logo and countdown shrink into: owl and logo on the left, timer on the right. */
 const HEADER = {
-  desktop: { height: 76, pad: 32, logo: 30, card: 34 },
-  mobile: { height: 60, pad: 16, logo: 22, card: 26 },
+  desktop: { height: 76, pad: 32, owl: 46, gap: 12, logo: 30, card: 30 },
+  mobile: { height: 60, pad: 16, owl: 34, gap: 8, logo: 22, card: 20 },
 };
 
 /** Layout rect of an element with any GSAP transform taken off, so header targets stay correct after resize. */
@@ -32,6 +33,7 @@ export default function Hero({ play }: { play: boolean }) {
     () => {
       const q = gsap.utils.selector(root);
       const hero = q("[data-hero]")[0] as HTMLElement;
+      const owl = q("[data-owl]")[0] as HTMLElement;
       const logo = q("[data-logo]")[0] as HTMLElement;
       const timer = q("[data-cd-wrap]")[0] as HTMLElement;
       const card = q("[data-card]")[0] as HTMLElement;
@@ -54,10 +56,21 @@ export default function Hero({ play }: { play: boolean }) {
             },
           })
           .fromTo(
+            owl,
+            { x: 0, y: 0, scale: 1 },
+            {
+              x: () => h.pad - untransformed(owl).left,
+              y: () => (h.height - h.owl) / 2 - untransformed(owl).top,
+              scale: () => h.owl / owl.offsetHeight,
+              ease: "power1.inOut",
+            },
+            0,
+          )
+          .fromTo(
             logo,
             { x: 0, y: 0, scale: 1 },
             {
-              x: () => h.pad - untransformed(logo).left,
+              x: () => h.pad + h.owl + h.gap - untransformed(logo).left,
               y: () => (h.height - h.logo) / 2 - untransformed(logo).top,
               scale: () => h.logo / logo.offsetHeight,
               ease: "power1.inOut",
@@ -141,7 +154,7 @@ export default function Hero({ play }: { play: boolean }) {
         .set(q("[data-cd-pair]"), { opacity: 1 }, 2.0)
         .from(
           q("[data-card]"),
-          { rotateX: -100, opacity: 0, transformPerspective: 400, transformOrigin: "50% 0%", duration: 0.8, stagger: 0.07, ease: "back.out(1.4)" },
+          { rotateX: -100, opacity: 0, transformPerspective: 400, transformOrigin: "50% 0%", duration: 0.9, stagger: 0.06, ease: "expo.out" },
           2.0,
         )
         .fromTo(q("[data-cd-label] [data-intro]"), { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.6, stagger: 0.08 }, 2.35)
@@ -162,9 +175,10 @@ export default function Hero({ play }: { play: boolean }) {
       <div className={s.layer}>
         <div className={s.bar} data-bar />
         <div className={s.stage}>
-          <div className={s.owl} data-owl data-fade>
+          <div className={s.owl} data-owl>
             <div data-intro className={s.owlInner}>
               <Image src="/images/owl-badge.png" alt="" width={88} height={88} priority />
+              <Blink eyes={OWL_EYES.badge} />
             </div>
           </div>
 

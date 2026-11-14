@@ -86,7 +86,7 @@ export default function FlipDigit({ ref, art }: { ref?: Ref<FlipDigitHandle>; ar
           const last = values.length - 1;
           values.forEach((value, i) => {
             // Thumb quickly through the middle of the run, then land on the real digit with weight.
-            const duration = !cascade ? 0.7 : i === last ? 0.6 : Math.max(0.07, 0.16 - i * 0.012);
+            const duration = !cascade ? 0.55 : i === last ? 0.6 : Math.max(0.07, 0.16 - i * 0.012);
             queue.current.push({ value, duration });
           });
           if (!busy.current) next();

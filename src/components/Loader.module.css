@@ -8,6 +8,7 @@
 }
 
 .owl {
+  position: relative;
   width: min(318px, 62vw);
   aspect-ratio: 1;
   opacity: 0;

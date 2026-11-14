@@ -14,14 +14,20 @@
 
 /* GSAP parks these one screen down (yPercent: 100) and slides them up; no CSS transform here,
    or the two offsets would add up. */
+.city,
 .values,
 .enter {
   box-shadow: 0 -40px 80px rgb(0 0 0 / 0.55);
 }
 
+.experience {
+  z-index: 1;
+  background: var(--night);
+}
+
 /* ---------- The city never really sleeps (Figma "Frame 3", 1440 x 1042) ---------- */
 .city {
-  z-index: 1;
+  z-index: 2;
   background: var(--night);
 }
 
@@ -66,23 +72,43 @@
   z-index: 1;
   box-shadow: 0 calc(4 * var(--u)) calc(50 * var(--u)) rgb(232 182 249 / 0.25);
   transform-origin: 50% 100%;
+  overflow: hidden;
 }
 
-.poster img {
+/* The artwork at its own 1024 x 1280 ratio, cropped like object-fit: cover, so the eyelids line up. */
+.posterArt {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  aspect-ratio: 1024 / 1280;
+  transform: translateY(-50%);
+}
+
+.posterArt img {
   object-fit: cover;
 }
 
-/* "THE NIGHT" and "IS CALLING" sit just behind the poster's edges, 170 design px either side of centre. */
+/*
+  "THE NIGHT" and "IS CALLING" sit over the poster's edges, 170 design px either side of centre.
+  Where a word crosses the artwork it breaks up into grain and screens into the image (the "HT" and
+  "IS" in the design): a fading mask hands over to a speckled one across the overlap.
+*/
 .night {
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 3.4 -1.45'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
   position: absolute;
   top: calc(199 * var(--u));
-  z-index: 0;
+  z-index: 2;
   font-family: var(--font-neuvorte), serif;
   font-size: calc(70 * var(--u));
   line-height: 1.43;
   letter-spacing: -0.04em;
   color: var(--neon);
   white-space: nowrap;
+  mix-blend-mode: screen;
+  mask-size: 100% 100%, 140px 140px;
+  mask-composite: add;
+  -webkit-mask-composite: source-over;
 }
 
 .night > span {
@@ -91,45 +117,25 @@
 
 .nightLeft {
   right: calc(50% + 170 * var(--u));
+  mask-image: linear-gradient(to right, #000 70%, transparent 94%), var(--grain);
+  -webkit-mask-image: linear-gradient(to right, #000 70%, transparent 94%), var(--grain);
 }
 
 .nightRight {
   left: calc(50% + 170 * var(--u));
+  mask-image: linear-gradient(to left, #000 74%, transparent 95%), var(--grain);
+  -webkit-mask-image: linear-gradient(to left, #000 74%, transparent 95%), var(--grain);
 }
 
-/* ---------- Values (Figma "Frame 10") ---------- */
+/* ---------- Values: colour floods, see Values.module.css ---------- */
 .values {
-  z-index: 2;
-  background: var(--night);
-}
-
-.valuesInner {
-  --u: min(calc(100vw / 1440), calc((100svh - var(--header-h)) / 640));
-  position: absolute;
-  inset: var(--header-h) 0 0 0;
-  display: grid;
-  place-items: center;
-}
-
-.value {
-  grid-area: 1 / 1;
-  width: min(calc(1076 * var(--u)), calc(100% - 48px));
-  font-size: calc(40 * var(--u));
-  line-height: calc(60 * var(--u));
-  letter-spacing: -0.04em;
-  color: var(--mute);
-}
-
-.valueTitle {
-  font-family: var(--font-anton), sans-serif;
-  font-size: calc(70 * var(--u));
-  letter-spacing: 0;
-  color: var(--ink);
+  z-index: 3;
+  background: var(--deep);
 }
 
 /* ---------- Enter a different state of night (Figma "Frame 9") ---------- */
 .enter {
-  z-index: 3;
+  z-index: 4;
   background: var(--void);
 }
 
@@ -299,16 +305,16 @@
     right: auto;
     left: -12%;
     bottom: calc(100% - 20px);
+    mask-image: linear-gradient(to bottom, #000 55%, transparent 100%), var(--grain);
+    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%), var(--grain);
   }
 
   .nightRight {
     left: auto;
     right: -12%;
     top: calc(100% - 20px);
-  }
-
-  .valuesInner {
-    --u: min(calc(100vw / 720), calc((100svh - var(--header-h)) / 700));
+    mask-image: linear-gradient(to top, #000 55%, transparent 100%), var(--grain);
+    -webkit-mask-image: linear-gradient(to top, #000 55%, transparent 100%), var(--grain);
   }
 
   .enterInner {

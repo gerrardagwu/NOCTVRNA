@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRef } from "react";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/gsap";
+import Blink, { OWL_EYES } from "./Blink";
 import s from "./Loader.module.css";
 
 const pageLoaded = () =>
@@ -63,6 +64,7 @@ export default function Loader({ onReveal }: { onReveal: () => void }) {
     <div ref={root} className={s.loader} data-loader aria-hidden="true">
       <div className={s.owl}>
         <Image src="/images/loader-owl.png" alt="" width={318} height={318} priority />
+        <Blink eyes={OWL_EYES.loader} />
       </div>
     </div>
   );

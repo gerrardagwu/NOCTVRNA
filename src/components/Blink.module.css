@@ -1,0 +1,40 @@
+.blink {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* The eye socket clips both lids to an eye shape; --lid runs 0 (open) to 1 (shut). */
+.eye {
+  --lid: 0;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.upper,
+.lower {
+  position: absolute;
+  left: -6%;
+  right: -6%;
+  transform: scaleY(var(--lid));
+}
+
+/* Feather-dark lids with a lighter brow, so a shut eye reads as plumage, not a hole. Shut, they
+   overlap a little past the middle so no iris shows through the seam. */
+.upper {
+  top: -6%;
+  height: 68%;
+  transform-origin: 50% 0;
+  background: linear-gradient(180deg, #3d1d63 0%, #24103d 55%, #12071e 86%, #040106 100%);
+  border-radius: 0 0 50% 50% / 0 0 38% 38%;
+}
+
+.lower {
+  bottom: -6%;
+  height: 50%;
+  transform-origin: 50% 100%;
+  background: linear-gradient(0deg, #321853 0%, #1d0c33 60%, #040106 100%);
+  border-radius: 50% 50% 0 0 / 38% 38% 0 0;
+}
