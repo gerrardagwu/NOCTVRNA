@@ -2,15 +2,15 @@
 
 import Image from "next/image";
 import { useRef, useState, type FormEvent } from "react";
-import { gsap, ScrollTrigger, SplitText, prefersReducedMotion, useGSAP } from "@/lib/gsap";
+import { gsap, SplitText, prefersReducedMotion, useGSAP } from "@/lib/gsap";
 import { useFontsReady } from "@/lib/useFontsReady";
 import Blink, { OWL_EYES } from "./Blink";
 import Experience, { type ExperienceHandle } from "./Experience";
 import Values from "./Values";
 import s from "./Stack.module.css";
 
-/** Experience stage, in timeline seconds: scroll walks the three scenes, then the city slides over it. */
-const EXP = { people: 0.55, atmos: 1.1, cover: 1.65 };
+/** Experience stage, in timeline seconds: scroll walks the three scenes, then the stage lets go. */
+const EXP = { people: 0.55, atmos: 1.1, end: 1.65 };
 /** Values stage, in timeline seconds after Originality has arrived. */
 const VAL = { freedom: 0.3, curation: 1.8, enter: 3.3 };
 const WIPE_FROM = "circle(0% at 84% 30%)";
@@ -19,7 +19,7 @@ const WIPE_TO = "circle(150% at 84% 30%)";
 /**
  * Everything after the manifesto, in three parts:
  *  1. Experience: a pinned full-screen scene; scrolling walks Sound, People, Atmosphere.
- *  2. The city: an ordinary section as tall as its content. It slides up over the Experience scene,
+ *  2. The city: an ordinary section as tall as its content that scrolls in after the Experience scene,
  *     then holds while the values slide up over it.
  *  3. Values and sign-up: a pinned full-screen stage; each value wipes in over the last, then the
  *     sign-up covers them.
@@ -39,18 +39,12 @@ export default function Stack() {
       const scrub = reduce ? true : 0.8;
       const vh = () => window.innerHeight;
       const expStage = q("[data-stage=experience]")[0] as HTMLElement;
-      const cityWrap = q("[data-city-wrap]")[0] as HTMLElement;
       const city = q("[data-city]")[0] as HTMLElement;
       const valStage = q("[data-stage=values]")[0] as HTMLElement;
 
       const headline = SplitText.create(q("[data-city-headline]"), { type: "words" });
       const layers = q("[data-vlayer]");
       const glow = gsap.to(q("[data-glow]"), { scale: 1.12, opacity: 0.75, duration: 3.2, ease: "sine.inOut", repeat: -1, yoyo: true });
-
-      // The city starts one screen early, overlapping the end of the Experience pin, so it slides up over it.
-      const overlap = () => (cityWrap.style.marginTop = `-${vh()}px`);
-      overlap();
-      ScrollTrigger.addEventListener("refreshInit", overlap);
 
       // The Experience scene rises into view while the manifesto sinks away behind it.
       gsap
@@ -81,14 +75,14 @@ export default function Stack() {
       mm.add({ mobile: "(max-width: 760px)", desktop: "(min-width: 761px)" }, (ctx) => {
         const mobile = ctx.conditions?.mobile;
 
-        // 1. Experience: pinned for the three scenes, then for one more screen while the city covers it.
+        // 1. Experience: pinned while scroll walks the three scenes.
         let expMode = 0;
         const exp = gsap.timeline({
           defaults: { ease: "none" },
           scrollTrigger: {
             trigger: expStage,
             start: "top top",
-            end: () => `+=${vh() * (EXP.cover + 1)}`,
+            end: () => `+=${vh() * EXP.end}`,
             pin: true,
             scrub,
             invalidateOnRefresh: true,
@@ -104,11 +98,9 @@ export default function Stack() {
             },
           },
         });
-        exp
-          .to({}, { duration: EXP.cover })
-          .to(q("[data-panel=experience] [data-inner]"), { scale: 0.88, opacity: 0.2, duration: 1, ease: "power2.inOut" }, EXP.cover);
+        exp.to({}, { duration: EXP.end });
 
-        // 2. The city: words and poster arrive as it slides in; the two words slide out over the poster.
+        // 2. The city: words and poster arrive as it scrolls in; the two words slide out over the poster.
         gsap
           .timeline({ scrollTrigger: { trigger: city, start: "top bottom", end: "top 10%", scrub: 0.6 } })
           .fromTo(headline.words, { opacity: 0.08, yPercent: 40 }, { opacity: 1, yPercent: 0, stagger: 0.02, duration: 0.6, ease: "none" });
@@ -172,7 +164,6 @@ export default function Stack() {
       });
 
       return () => {
-        ScrollTrigger.removeEventListener("refreshInit", overlap);
         mm.revert();
         glow.kill();
         headline.revert();
@@ -189,7 +180,7 @@ export default function Stack() {
         </section>
       </div>
 
-      <div className={s.cityWrap} data-city-wrap>
+      <div className={s.cityWrap}>
         <section className={s.city} data-city aria-labelledby="city-title">
           <div className={s.cityInner} data-city-inner>
             <h2 id="city-title" className={s.headline} data-city-headline>

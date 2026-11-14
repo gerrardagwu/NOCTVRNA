@@ -26,7 +26,9 @@
   border-radius: 0;
   cursor: pointer;
   pointer-events: auto;
-  background: var(--void); /* solid: content scrolls under the header now */
+  /* Translucent, with a blur so content scrolling underneath reads as colour and light, not text. */
+  background: rgb(9 9 9 / 0.7);
+  backdrop-filter: blur(14px) saturate(1.2); /* the build adds the -webkit- copy for Safari */
   border-bottom: 0.5px solid var(--deep);
   opacity: 0;
   visibility: hidden;

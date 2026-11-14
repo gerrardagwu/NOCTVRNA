@@ -34,8 +34,8 @@ npm run build && npm start
 | Footer | Scrolls in after the stage releases. | `src/components/Footer.tsx` |
 
 After the manifesto (`src/components/Stack.tsx`): the Experience scene is pinned full-screen while scroll walks its
-three photos; the city section is as tall as its content and slides up over it, then holds while the values stage
-(pinned full-screen) slides up over the city. `EXP` and `VAL` at the top of that file set where each beat falls.
+three photos; the city section is as tall as its content and scrolls in normally after it, then holds while the
+values stage (pinned full-screen) slides up over it. `EXP` and `VAL` at the top of that file set where each beat falls.
 
 All motion respects `prefers-reduced-motion`.
 

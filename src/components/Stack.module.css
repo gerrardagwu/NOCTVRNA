@@ -35,12 +35,11 @@
 .city {
   position: relative;
   background: var(--night);
-  box-shadow: 0 -40px 80px rgb(0 0 0 / 0.55);
 }
 
 .cityInner {
   /* Poster width; the two words around it scale with it. */
-  --pw: clamp(300px, 40vw, 600px);
+  --pw: clamp(240px, 32vw, 480px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -295,7 +294,7 @@
 
 @media (max-width: 760px) {
   .cityInner {
-    --pw: min(80vw, 380px);
+    --pw: min(64vw, 304px);
     gap: 64px;
   }
 
