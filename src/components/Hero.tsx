@@ -203,7 +203,7 @@ export default function Hero({ play }: { play: boolean }) {
         <div className={s.stage}>
           <div className={s.owl} data-owl data-fade>
             <div data-intro className={s.owlInner}>
-              <Image src="/images/owl-face.webp" alt="" fill sizes="(max-width: 760px) 82vw, 460px" priority quality={85} />
+              <Image src="/images/hero-owl.webp" alt="" fill sizes="(max-width: 760px) 112vw, 1000px" priority quality={85} />
               <Blink eyes={OWL_EYES.face} />
             </div>
           </div>
