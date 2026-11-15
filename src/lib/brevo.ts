@@ -94,34 +94,35 @@ export async function registerContact(
   const path = `/contacts/${encodeURIComponent(person.email)}`;
   const names = { FIRSTNAME: person.firstName, ...(person.lastName ? { LASTNAME: person.lastName } : {}) };
 
-  for (let attempt = 0; attempt < 2; attempt++) {
-    const found = await call<Contact>(config, "GET", path);
+  const found = await call<Contact>(config, "GET", path);
 
-    if (found.status === 404) {
-      try {
-        await call(config, "POST", "/contacts", {
-          email: person.email,
-          attributes: names,
-          listIds: [config.listId],
-          updateEnabled: false,
-        });
-        return "joined";
-      } catch (e) {
-        // Created by a parallel request in the meantime: look again and treat it as an existing contact.
-        if (e instanceof BrevoError && e.code === "duplicate_parameter" && attempt === 0) continue;
-        throw e;
+  if (found.status === 404) {
+    try {
+      await call(config, "POST", "/contacts", {
+        email: person.email,
+        attributes: names,
+        listIds: [config.listId],
+        updateEnabled: false,
+      });
+      return "joined";
+    } catch (e) {
+      // Brevo already has the address but its lookup hasn't caught up: it was created moments ago (a double
+      // submit, or two tabs). Make sure it's in the list and count it as already registered, so no second email.
+      if (e instanceof BrevoError && e.code === "duplicate_parameter") {
+        await call(config, "PUT", path, { listIds: [config.listId] });
+        return "already";
       }
+      throw e;
     }
-
-    const contact = found.data!;
-    if (contact.emailBlacklisted || contact.listUnsubscribed?.includes(config.listId)) return "suppressed";
-    if (contact.listIds?.includes(config.listId)) return "already";
-
-    const hasName = typeof contact.attributes?.FIRSTNAME === "string" && contact.attributes.FIRSTNAME.trim() !== "";
-    await call(config, "PUT", path, { listIds: [config.listId], ...(hasName ? {} : { attributes: names }) });
-    return "joined";
   }
-  throw new BrevoError(409, "conflict", "Contact kept changing while registering");
+
+  const contact = found.data!;
+  if (contact.emailBlacklisted || contact.listUnsubscribed?.includes(config.listId)) return "suppressed";
+  if (contact.listIds?.includes(config.listId)) return "already";
+
+  const hasName = typeof contact.attributes?.FIRSTNAME === "string" && contact.attributes.FIRSTNAME.trim() !== "";
+  await call(config, "PUT", path, { listIds: [config.listId], ...(hasName ? {} : { attributes: names }) });
+  return "joined";
 }
 
 /** Sends a transactional email from the configured sender. Brevo's own blocklists still apply. */
