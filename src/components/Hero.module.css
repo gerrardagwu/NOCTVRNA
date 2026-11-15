@@ -1,7 +1,7 @@
 /*
   The hero is laid out like the poster, top to bottom: logo, the owl's face (its brow tucked under the
-  logo), the taglines, then the countdown. On desktop it's a 1440 x 900 composition scaled as one piece:
-  every size and position is design pixels times --u. Everything sits in a fixed layer so the logo and
+  logo), the taglines, then the countdown. On desktop it's a 1440 x 960 composition scaled as one piece
+  (60 units of air above the logo): every size and position is design pixels times --u. Everything sits in a fixed layer so the logo and
   countdown can be scrubbed straight into the sticky header.
 */
 .root {
@@ -151,12 +151,12 @@
 }
 
 .stage {
-  --u: min(calc(100vw / 1440), calc(var(--hero-h) / 900));
+  --u: min(calc(100vw / 1440), calc(var(--hero-h) / 960));
   position: absolute;
   left: calc(50% - 720 * var(--u));
-  top: calc(50% - 450 * var(--u));
+  top: calc(50% - 480 * var(--u));
   width: calc(1440 * var(--u));
-  height: calc(900 * var(--u));
+  height: calc(960 * var(--u));
 }
 
 /* A wide band of the owl's face (from the poster), feathered at every edge so it melts into the night
@@ -164,7 +164,7 @@
 .owl {
   position: absolute;
   left: calc(50% - 500 * var(--u));
-  top: calc(190 * var(--u));
+  top: calc(250 * var(--u));
   width: calc(1000 * var(--u));
   aspect-ratio: 1024 / 588;
 }
@@ -190,7 +190,7 @@
 .logo {
   position: absolute;
   left: calc(50% - 465 * var(--u));
-  top: 0;
+  top: calc(60 * var(--u));
   width: calc(931 * var(--u));
   height: calc(343 * var(--u));
   display: block;
@@ -224,7 +224,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(660 * var(--u));
+  top: calc(720 * var(--u));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -253,7 +253,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(742 * var(--u));
+  top: calc(802 * var(--u));
   text-align: center;
   font-family: var(--font-bunch), sans-serif;
   font-weight: 700;
@@ -269,7 +269,7 @@
   --cdu: var(--u);
   position: absolute;
   left: calc(50% - 284 * var(--cdu));
-  top: calc(788 * var(--u));
+  top: calc(848 * var(--u));
   transform-origin: 0 0;
   will-change: transform;
 }
