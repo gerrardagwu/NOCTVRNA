@@ -44,16 +44,17 @@ export default function Blink({ eyes, className }: { eyes: Eye[]; className?: st
         const tl = gsap.timeline({ onComplete: schedule });
         const times = Math.random() < 0.22 ? 2 : 1;
         for (let i = 0; i < times; i++) {
-          tl.to(lids, { "--lid": 1, duration: 0.07, ease: "power2.in" }).to(lids, {
+          // A slow, deliberate blink: the lid draws down, rests a beat, then lifts.
+          tl.to(lids, { "--lid": 1, duration: 0.15, ease: "power2.inOut" }).to(lids, {
             "--lid": 0,
-            duration: 0.16,
-            ease: "power3.out",
-            delay: 0.03,
+            duration: 0.3,
+            ease: "power2.out",
+            delay: 0.08,
           });
         }
       };
       const schedule = () => {
-        next = gsap.delayedCall(1.8 + Math.random() * 3.4, blink);
+        next = gsap.delayedCall(2.4 + Math.random() * 3.6, blink);
       };
 
       next = gsap.delayedCall(0.6 + Math.random() * 2, blink);
