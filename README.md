@@ -91,6 +91,13 @@ after that (ticket drops, lineup news, reminders) is sent from Brevo, with no ch
    what to expect next, the days left to 12.12.26 in the countdown's flip tiles, and a save-the-date link (Google
    Calendar, or `/the-lagos-life.ics` for Apple and Outlook).
 
+   It stays dark in every email app, dark mode included. Apps like Gmail on iPhone flip an email's colours in dark
+   mode but leave images alone, so everything coloured is an image: the ticket is drawn per guest by
+   `/api/ticket` (`src/app/api/ticket/route.tsx`), with their name, and the rest are files in `public/email/`.
+   Backgrounds are painted so they aren't flipped, and the white and grey text is wrapped so a flip cancels out
+   (details at the top of `src/lib/waitlistEmail.ts`). Ticket links are signed, so the route only draws names that
+   came from the waitlist.
+
 The API key is read only on the server (`server-only`); it never reaches the browser.
 
 **Spam and abuse protection:** requests must come from the site itself (Origin check) and be small JSON. A hidden
@@ -110,6 +117,7 @@ NOCTVRNA. Unsubscribe anytime." (`CONSENT_TEXT` in `src/lib/waitlist.ts`). Only 
 | `BREVO_SENDER_EMAIL` | A sender on `thisisnoctvrna.com` that Brevo has verified, with the domain authenticated (DKIM, SPF, DMARC) |
 | `BREVO_SENDER_NAME` | Who the email is from, e.g. NOCTVRNA |
 | `SITE_URL` | Optional. The site address used in the email. Defaults to `https://www.thisisnoctvrna.com` |
+| `TICKET_IMAGE_SECRET` | Optional. Signs the ticket image links. Without it they're signed with a key derived from `BREVO_API_KEY`, so replacing that key breaks the ticket image in emails already sent; set this to any long random string to avoid that |
 
 After changing a variable in Vercel, redeploy so the site picks it up. If any variable is missing, the form shows
 "Sign-ups are paused for a moment" and the Vercel function log names what's missing.
@@ -123,9 +131,11 @@ night), Brevo Automations can start when a contact is added to the list.
 ## Assets
 
 `public/email/` holds the confirmation email's images (PNG and JPG, since email apps don't show WebP or SVG). They're
-made from the site itself by `node scripts/email-assets.mjs` with `npm run dev` running: the poster, the ticket's
-badge, stamp, stub and grain, and the flip tiles `digit-0.png` to `digit-9.png`. `logo.png` and `owl.jpg` are from the
-first version of the email; emails already sent still link to them, so keep them.
+made from the site itself by `node scripts/email-assets.mjs` with `npm run dev` running: the poster, THE LAGOS LIFE,
+the step numbers, the Save the date button, the tagline, the flip tiles `digit-0.png` to `digit-9.png`, and the badge,
+stamp and stub that `/api/ticket` puts on each guest's ticket. `logo.png`, `owl.jpg` and `grain.png` are from earlier
+versions of the email; emails already sent still link to them, so keep them. The ticket's fonts (Anton and Bricolage
+Grotesque, both under the SIL Open Font License) are in `assets/fonts/`.
 
 Everything in `public/images` except the photos was exported from the Figma file: hero background, logo, owl badge,
 strip owl, poster, and the six flip-card shapes (`flip-1.svg` to `flip-6.svg`).

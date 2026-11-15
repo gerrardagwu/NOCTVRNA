@@ -1,17 +1,20 @@
 /**
  * Builds the images the waitlist confirmation email uses (public/email/), from the site itself so they
- * match it exactly. Email apps can't run the site's CSS (masks, rotation, vertical text, blend modes),
- * so those pieces are baked into images; everything a reader needs to read stays live text in the email.
+ * match it exactly. Email apps can't run the site's CSS, and dark-mode apps (Gmail on iPhone above all)
+ * repaint an email's colours but leave images alone. So everything coloured is an image, and the live
+ * text is white or grey, which survives the repaint (see src/lib/waitlistEmail.ts).
  *
- *   poster.jpg  the hero's logo over the owl, faded into the email background
- *   badge.png   the round owl badge from the ticket's corner
- *   stamp.png   the worn, tilted CONFIRMED stamp (transparent, sits on the green ticket)
- *   stub.png    the stub: ADMIT ONE, barcode and date (transparent)
- *   grain.png   the ticket's paper grain, tiled behind it
- *   digit-0..9.png  the countdown's flip tiles, one per digit, for the "days to go" count
+ *   poster.jpg        the hero: the logo over the owl, faded into the email background
+ *   lagos-life.png    THE LAGOS LIFE in the hero's green
+ *   step-1..3.png     the green 01, 02, 03 of "What happens next"
+ *   save-the-date.png the green button
+ *   tagline.png       BEYOND THE ORDINARY. INTO THE NIGHT.
+ *   digit-0..9.png    the countdown's flip tiles, one per digit, for the "days to go" count
+ *   badge.png, stamp.png, stub.png  pieces of the guest's ticket, drawn per guest by /api/ticket
  *
  * usage: start the site (npm run dev), then: node scripts/email-assets.mjs [http://localhost:3000]
- * Already-sent emails link to logo.png and owl.jpg in the same folder, so keep those files.
+ * Emails already sent link to earlier images in the same folder (logo.png, owl.jpg, grain.png), so
+ * keep those files.
  */
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
@@ -37,15 +40,16 @@ const browser = await chromium.launch();
       [data-bar], [data-cd-tab], [data-ticket], [data-cd-title], [data-cd-wrap], [data-lagos], [data-after],
       [class*="Blink"], nextjs-portal { display: none !important; }
       html, body { background: ${BG} !important; }
-      #poster-fade { position: fixed; inset: 0; z-index: 2147483647; pointer-events: none;
+      #poster-fade { position: absolute; inset: 0; pointer-events: none;
         background:
           linear-gradient(to bottom, ${BG} 2%, transparent 9%, transparent 58%, ${BG} 76%),
           linear-gradient(to right, ${BG} 8%, transparent 24%, transparent 76%, ${BG} 92%); }`,
   });
+  // The fade goes over the owl and the city behind it, under the logo.
   await page.evaluate(() => {
     const d = document.createElement("div");
     d.id = "poster-fade";
-    document.body.append(d);
+    document.querySelector("[data-owl]").after(d);
   });
   await page.waitForTimeout(300);
   // Logo top ≈ 60, owl fading out by ≈ 730 on the 1440×960 stage; the margins leave the logo's spikes room.
@@ -56,6 +60,39 @@ const browser = await chromium.launch();
     .composite([{ input: { create: { width: flat.info.width, height: flat.info.height, channels: 3, background: BG } }, blend: "lighten" }])
     .jpeg({ quality: 80, mozjpeg: true, chromaSubsampling: "4:4:4" })
     .toFile(path.join(out, "poster.jpg"));
+  await page.close();
+}
+
+/* ---------- type: step numbers, the button and the tagline, in the site's Anton ---------- */
+{
+  const page = await browser.newPage({ viewport: { width: 800, height: 300 }, deviceScaleFactor: 2 });
+  await page.goto(base, { waitUntil: "networkidle" });
+  await page.evaluate(() => document.fonts.ready);
+  const draw = async (name, html, opaque = false) => {
+    await page.evaluate((html) => {
+      document.documentElement.style.background = "transparent";
+      document.body.style.background = "transparent";
+      document.body.innerHTML = `<div style="position:fixed;left:0;top:0;z-index:2147483647;display:inline-flex;font-family:var(--font-anton),sans-serif;font-weight:400"><div id="t">${html}</div></div>`;
+    }, html);
+    await page.waitForTimeout(100);
+    const png = await page.locator("#t").screenshot({ omitBackground: !opaque });
+    await sharp(png).png({ palette: true, quality: 95, effort: 10 }).toFile(path.join(out, name));
+  };
+  for (const n of [1, 2, 3]) {
+    await draw(`step-${n}.png`, `<div style="width:48px;height:32px;font-size:28px;line-height:32px;color:#55ff00">0${n}</div>`);
+  }
+  await draw(
+    "save-the-date.png",
+    `<div style="width:200px;height:52px;display:flex;align-items:center;justify-content:center;border-radius:6px;background:#55ff00;color:#0a0a06;font-size:18px;letter-spacing:.08em">SAVE THE DATE</div>`,
+  );
+  await draw(
+    "lagos-life.png",
+    `<div style="width:240px;height:40px;font-size:34px;line-height:40px;text-align:center;color:#55ff00;white-space:nowrap">THE LAGOS LIFE</div>`,
+  );
+  await draw(
+    "tagline.png",
+    `<div style="width:320px;height:20px;font-size:14px;line-height:20px;letter-spacing:2px;color:#c38bef;white-space:nowrap">BEYOND THE ORDINARY. INTO THE NIGHT.</div>`,
+  );
   await page.close();
 }
 
@@ -115,17 +152,5 @@ const browser = await chromium.launch();
   await page.close();
 }
 
-/* ---------- grain: the ticket's noise, as a small tile ---------- */
-{
-  const page = await browser.newPage({ viewport: { width: 120, height: 120 }, deviceScaleFactor: 1 });
-  await page.setContent(
-    `<style>html,body{margin:0;background:transparent}</style>
-     <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><filter id="g"><feTurbulence type="fractalNoise" baseFrequency="0.95" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.26 0"/></filter><rect width="100%" height="100%" filter="url(#g)"/></svg>`,
-  );
-  const png = await page.screenshot({ omitBackground: true, clip: { x: 0, y: 0, width: 120, height: 120 } });
-  await sharp(png).png({ palette: true, colours: 16, effort: 10 }).toFile(path.join(out, "grain.png"));
-  await page.close();
-}
-
 await browser.close();
-console.log("Wrote poster.jpg, badge.png, stamp.png, stub.png, grain.png and digit-0..9.png to public/email/");
+console.log("Wrote poster.jpg, lagos-life.png, step-1..3.png, save-the-date.png, tagline.png, badge.png, stamp.png, stub.png and digit-0..9.png to public/email/");
