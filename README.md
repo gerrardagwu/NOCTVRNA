@@ -29,7 +29,7 @@ npm run build && npm start
 | Sound / People / Atmosphere | Full-screen scene. Scroll (or hover/tap a word) to change the photo: it fades up with a slow push-in and drifts gently against the cursor. | `src/components/Experience.tsx` |
 | The city | Headline, a body-size line with the highlights, and event details (date, city, doors) on the left; the backlit poster on the right (stacked on mobile). The poster leans toward the cursor. It holds once it reaches the top and the whole poster is in view, while the values slide over it. | `src/components/Stack.tsx` |
 | Our philosophy | Desktop: one full-screen stage that stays put while you scroll through Originality, Freedom of Expression and Intentional Curation. Inside it, each value's words lift out, its photo slides up and away as the next rises in from below, and the new words spring up; each value rests for a beat before the next swap, and the counter in the corner rolls 01, 02, 03. The stage keeps holding while the sign-up slides over it. Mobile: the three are a row of cards you swipe (snapping, the next card peeking in at the edge), with progress bars underneath that you can tap; each card plays its entrance when it comes into view. Letters hop under the cursor, the spinning owl sticker speeds up and drifts toward you, the photo drifts the other way. | `src/components/Values.tsx` |
-| Sign-up | Slides over the last value; lines rise in, the glow breathes. Name and email are checked on submit: a problem turns that field's label and line red with the reason underneath, and clears as soon as it's fixed. A good submit opens a ticket (the guest's name, date, city, an ON THE LIST stamp) in a dialog; Esc, the backdrop or the buttons close it. | `src/components/Stack.tsx` |
+| Sign-up | Slides over the last value; lines rise in, the glow breathes. The form (`src/components/Waitlist.tsx`) puts people on the Brevo waitlist; see below. Name and email are checked on submit: a problem turns that field's label and line red with the reason underneath, and clears as soon as it's fixed. A good submit opens a ticket (the guest's name, date, city, an ON THE LIST stamp) in a dialog; Esc, the backdrop or the buttons close it. | `src/components/Stack.tsx` |
 | Footer | Scrolls in after the stage releases. | `src/components/Footer.tsx` |
 
 After the manifesto (`src/components/Stack.tsx`): the Experience scene is pinned full-screen while scroll walks its
@@ -57,8 +57,8 @@ All motion respects `prefers-reduced-motion`.
    const neuvorte = localFont({ src: "../fonts/Neuvorte-Regular.woff2", variable: "--font-neuvorte" });
    ```
 
-2. **Sign-up form.** "Notify Me!" checks the fields and shows a confirmation, but doesn't send anything yet. Connect it
-   to the mailing list or ticketing provider at the `TODO` in `src/components/Stack.tsx`.
+2. **Waitlist.** Connected to Brevo; see [Waitlist and email (Brevo)](#waitlist-and-email-brevo) for the settings it
+   needs.
 
 3. **Countdown target** is 12 December 2026, 00:00 Lagos time (`EVENT_TIME` in `src/components/Countdown.tsx`).
    Change it there if doors have a set time.
@@ -68,7 +68,58 @@ All motion respects `prefers-reduced-motion`.
 
 5. Add `metadataBase` in `src/app/layout.tsx` once the domain is known, so social previews use absolute URLs.
 
+## Waitlist and email (Brevo)
+
+The "Notify Me!" form adds people to a Brevo contact list and sends them a branded confirmation email. Everything
+after that (ticket drops, lineup news, reminders) is sent from Brevo, with no change to the site.
+
+**How a sign-up works**
+
+1. The form (`src/components/Waitlist.tsx`) checks the name, email and consent box in the browser, then posts them to
+   `/api/waitlist`.
+2. The route (`src/app/api/waitlist/route.ts`) runs on Vercel's servers. It checks everything again and then
+   (`src/lib/brevo.ts`):
+   - **New address:** creates the contact (`FIRSTNAME`, `LASTNAME`) in the waitlist list and sends the confirmation.
+   - **Already in the list:** changes nothing and sends nothing; the visitor sees "Still on the list".
+   - **Known to Brevo but not in the list:** adds them to the list (filling in a missing name) and sends the
+     confirmation.
+   - **Unsubscribed** (blocklisted, or unsubscribed from this list): changes nothing. Brevo's suppression stands, and
+     the visitor is told to email the sender address if they want updates again.
+3. The confirmation (`src/lib/waitlistEmail.ts`, images in `public/email/`) comes from `BREVO_SENDER_EMAIL`, with
+   replies going to the same address. If it fails to send, the person is still on the list.
+
+The API key is read only on the server (`server-only`); it never reaches the browser.
+
+**Spam and abuse protection:** requests must come from the site itself (Origin check) and be small JSON. A hidden
+honeypot field, and forms filled in faster than a person could, are silently dropped. Each IP gets 6 tries per
+10 minutes. That limit is per server instance; for a hard limit across all instances, turn on Vercel's Firewall or
+BotID for `/api/waitlist`. Names can't contain links or markup, because they appear in the email.
+
+**Consent:** the form needs an unticked-by-default box: "Email me ticket drops, lineup news and event updates from
+NOCTVRNA. Unsubscribe anytime." (`CONSENT_TEXT` in `src/lib/waitlist.ts`). Only people who tick it are added.
+
+**Settings** (Vercel → Project → Settings → Environment Variables; names in `.env.example`):
+
+| Variable | What it is |
+| --- | --- |
+| `BREVO_API_KEY` | A Brevo API key with access to **Contacts** and **Transactional emails** (SMTP & API → API keys) |
+| `BREVO_LIST_ID` | The numeric ID of the waitlist list (Contacts → Lists) |
+| `BREVO_SENDER_EMAIL` | A sender on `thisisnoctvrna.com` that Brevo has verified, with the domain authenticated (DKIM, SPF, DMARC) |
+| `BREVO_SENDER_NAME` | Who the email is from, e.g. NOCTVRNA |
+| `SITE_URL` | Optional. The site address used in the email. Defaults to `https://thisisnoctvrna.com` |
+
+After changing a variable in Vercel, redeploy so the site picks it up. If any variable is missing, the form shows
+"Sign-ups are paused for a moment" and the Vercel function log names what's missing.
+
+**Sending campaigns from Brevo:** everyone who joins is in the waitlist list (Contacts → Lists). To announce tickets,
+the lineup or reminders, create a campaign (Campaigns → Email), choose the waitlist list as recipients and send or
+schedule it. Brevo adds the unsubscribe link and leaves out anyone who has unsubscribed, bounced or been blocklisted.
+Use `{{ contact.FIRSTNAME }}` in a campaign to greet people by name. For a series (for example, reminders before the
+night), Brevo Automations can start when a contact is added to the list.
+
 ## Assets
+
+`public/email/` holds the confirmation email's logo and owl (PNG and JPG, since email apps don't show WebP or SVG).
 
 Everything in `public/images` except the photos was exported from the Figma file: hero background, logo, owl badge,
 strip owl, poster, and the six flip-card shapes (`flip-1.svg` to `flip-6.svg`).
