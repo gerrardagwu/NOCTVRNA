@@ -31,14 +31,60 @@ export const VALUES: { title: string; tag: string; body: string; photo?: Photo }
 
 const RING_TEXT = "NOCTVRNA • THE LAGOS LIFE • 12.12.26 • ";
 
-/** One value's entrance: letters spring up, the sticker spins in, the tag slaps on, the copy follows. */
+/** Where a value's words, tag, sticker and copy start before its entrance. */
+const HIDDEN = {
+  chars: { yPercent: 110, rotate: 12, opacity: 0 },
+  sticker: { scale: 0.3, rotate: -140, opacity: 0 },
+  tag: { scale: 0 },
+  body: { y: 30, opacity: 0 },
+};
+
+const parts = (layer: Element) => ({
+  chars: layer.querySelectorAll("[data-vchar]"),
+  sticker: layer.querySelector("[data-vsticker]"),
+  tag: layer.querySelector("[data-vtag]"),
+  body: layer.querySelector("[data-vbody]"),
+});
+
+/**
+ * Put a value in its pre-entrance state. Set up front rather than left to the entrance's from-values: a
+ * staggered tween only applies its start state to the first letter until the playhead reaches the rest.
+ */
+export function hideValue(layer: Element) {
+  const p = parts(layer);
+  gsap.set(p.chars, HIDDEN.chars);
+  gsap.set(p.sticker, HIDDEN.sticker);
+  gsap.set(p.tag, HIDDEN.tag);
+  gsap.set(p.body, HIDDEN.body);
+}
+
+/** One value's entrance (from hideValue's state): letters spring up, the sticker spins in, the tag slaps on, the copy follows. */
 export function revealValue(layer: Element) {
+  const p = parts(layer);
+  const at = { immediateRender: false };
   return gsap
     .timeline()
-    .from(layer.querySelectorAll("[data-vchar]"), { yPercent: 110, rotate: 12, opacity: 0, stagger: 0.02, duration: 0.55, ease: "expo.out" })
-    .from(layer.querySelector("[data-vsticker]"), { scale: 0.3, rotate: -140, opacity: 0, duration: 0.7, ease: "expo.out" }, 0.05)
-    .from(layer.querySelector("[data-vtag]"), { scale: 0, duration: 0.5, ease: "expo.out" }, 0.3)
-    .from(layer.querySelector("[data-vbody]"), { y: 30, opacity: 0, duration: 0.5, ease: "power2.out" }, 0.35);
+    .fromTo(p.chars, HIDDEN.chars, { ...at, yPercent: 0, rotate: 0, opacity: 1, stagger: 0.02, duration: 0.55, ease: "expo.out" })
+    .fromTo(p.sticker, HIDDEN.sticker, { ...at, scale: 1, rotate: 0, opacity: 1, duration: 0.7, ease: "expo.out" }, 0.05)
+    .fromTo(p.tag, HIDDEN.tag, { ...at, scale: 1, duration: 0.5, ease: "expo.out" }, 0.3)
+    .fromTo(p.body, HIDDEN.body, { ...at, y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 0.35);
+}
+
+/**
+ * Desktop: swap one value for the next inside the still stage, starting at `at` on a scrubbed timeline.
+ * The words lift out first, then the photo slides up and away as the next one rises in from below, and the
+ * new words spring up once it's there. Returns the time the swap finishes.
+ */
+export function swapValues(tl: gsap.core.Timeline, from: Element, to: Element, at: number) {
+  const rest = (layer: Element) => [layer.querySelector("[data-vsticker]"), layer.querySelector("[data-vtag]"), layer.querySelector("[data-vbody]")];
+  const photo = to.querySelector("[data-vphoto]");
+  tl.to(from.querySelectorAll("[data-vchar]"), { yPercent: -110, opacity: 0, stagger: 0.012, duration: 0.35, ease: "power2.in" }, at)
+    .to(rest(from), { y: -50, opacity: 0, stagger: 0.04, duration: 0.35, ease: "power2.in" }, at + 0.04)
+    .to(from, { yPercent: -100, duration: 0.8, ease: "power3.inOut" }, at + 0.12)
+    .fromTo(to, { yPercent: 100 }, { yPercent: 0, duration: 0.8, ease: "power3.inOut", immediateRender: true }, at + 0.12);
+  if (photo) tl.fromTo(photo, { scale: 1.15 }, { scale: 1, duration: 1, ease: "power2.out" }, at + 0.12);
+  tl.add(revealValue(to), at + 0.62);
+  return at + 1.47;
 }
 
 /** The value's photo settling from a slow push-in. */
@@ -48,9 +94,9 @@ export function settleValue(layer: Element) {
 }
 
 /**
- * Our philosophy. On desktop each value is a full screen of its own and they scroll past one after another
- * (the scroll-linked entrances live in Stack). On mobile they become a row of cards you swipe through, the
- * next one peeking in from the side. This component owns the hover play (letters hop under the cursor, the
+ * Our philosophy. On desktop it's one full-screen stage that stays put while scrolling swaps the values
+ * inside it (the scroll timeline lives in Stack, built from swapValues). On mobile the values become a row
+ * of cards you swipe through, the next one peeking in from the side. This component owns the hover play (letters hop under the cursor, the
  * sticker spins faster and leans toward you), the card entrances on mobile and the swipe progress.
  */
 export default function Values() {
@@ -110,6 +156,7 @@ export default function Values() {
       // scrolling down to the row or swiping to the card. (The viewport observer sees the row's clipping.)
       const mm = gsap.matchMedia();
       mm.add("(max-width: 760px)", () => {
+        layers.forEach(hideValue);
         const entrances = layers.map((layer) => gsap.timeline({ paused: true }).add(settleValue(layer), 0).add(revealValue(layer), 0.1));
         const io = new IntersectionObserver(
           (entries) =>
@@ -154,85 +201,102 @@ export default function Values() {
   };
 
   return (
-    <div ref={root} className={s.values}>
-      <div ref={track} className={s.layers} data-vlayers onScroll={onTrackScroll}>
-        {VALUES.map((v, i) => (
-          <article
-            key={v.title}
-            className={`${s.layer} ${s[`v${i + 1}`]} ${v.photo ? s.hasPhoto : ""}`}
-            data-vlayer
-            aria-labelledby={`value-${i}`}
-          >
-            <div className={s.layerIn} data-vinner>
-              {v.photo && (
-                <>
-                  <div className={s.photo} data-vpan>
-                    <div className={s.photoZoom} data-vphoto>
-                      <Image
-                        src={v.photo.src}
-                        alt={v.photo.alt}
-                        fill
-                        sizes="(max-width: 760px) 90vw, 100vw"
-                        quality={85}
-                        style={{ objectPosition: v.photo.focus }}
-                      />
+    <div ref={root} className={s.values} data-values>
+      <div className={s.stage} data-vstage>
+        <div className={s.stageIn} data-vstage-in>
+          <div ref={track} className={s.layers} data-vlayers onScroll={onTrackScroll}>
+            {VALUES.map((v, i) => (
+              <article
+                key={v.title}
+                className={`${s.layer} ${s[`v${i + 1}`]} ${v.photo ? s.hasPhoto : ""}`}
+                data-vlayer
+                aria-labelledby={`value-${i}`}
+              >
+                <div className={s.layerIn} data-vinner>
+                  {v.photo && (
+                    <>
+                      <div className={s.photo} data-vpan>
+                        <div className={s.photoZoom} data-vphoto>
+                          <Image
+                            src={v.photo.src}
+                            alt={v.photo.alt}
+                            fill
+                            sizes="(max-width: 760px) 90vw, 100vw"
+                            quality={85}
+                            style={{ objectPosition: v.photo.focus }}
+                          />
+                        </div>
+                      </div>
+                      <div className={s.scrim} aria-hidden="true" />
+                    </>
+                  )}
+                  <div className={s.grid}>
+                    <div className={s.top}>
+                      <span className={s.count} aria-label={`Value ${i + 1} of ${VALUES.length}`}>
+                        {String(i + 1).padStart(2, "0")}
+                        <span aria-hidden="true"> / 03</span>
+                      </span>
                     </div>
-                  </div>
-                  <div className={s.scrim} aria-hidden="true" />
-                </>
-              )}
-              <div className={s.grid}>
-                <div className={s.top}>
-                  <span className={s.count} aria-label={`Value ${i + 1} of ${VALUES.length}`}>
-                    {String(i + 1).padStart(2, "0")}
-                    <span aria-hidden="true"> / 03</span>
-                  </span>
-                </div>
 
-                <h3 id={`value-${i}`} className={s.title} data-vtitle>
-                  <span className="sr-only">{v.title}</span>
-                  {v.title.split(" ").map((word, wi) => (
-                    <span key={wi} className={s.wordWrap} aria-hidden="true">
-                      {[...word].map((ch, ci) => (
-                        <span key={ci} className={s.chWrap} data-vchar>
-                          <span className={s.ch}>{ch}</span>
+                    <h3 id={`value-${i}`} className={s.title} data-vtitle>
+                      <span className="sr-only">{v.title}</span>
+                      {v.title.split(" ").map((word, wi) => (
+                        <span key={wi} className={s.wordWrap} aria-hidden="true">
+                          {[...word].map((ch, ci) => (
+                            <span key={ci} className={s.chWrap} data-vchar>
+                              <span className={s.ch}>{ch}</span>
+                            </span>
+                          ))}
                         </span>
                       ))}
-                    </span>
-                  ))}
-                </h3>
+                    </h3>
 
-                <div className={s.bottom}>
-                  <span className={s.tagWrap} data-vtag>
-                    <span className={s.tag}>{v.tag}</span>
-                  </span>
-                  <p className={s.body} data-vbody>
-                    {v.body}
-                  </p>
-                </div>
-              </div>
+                    <div className={s.bottom}>
+                      <span className={s.tagWrap} data-vtag>
+                        <span className={s.tag}>{v.tag}</span>
+                      </span>
+                      <p className={s.body} data-vbody>
+                        {v.body}
+                      </p>
+                    </div>
+                  </div>
 
-              <div className={s.sticker} data-sticker aria-hidden="true">
-                <div className={s.stickerIn} data-vsticker>
-                  <svg className={s.ring} data-ring viewBox="0 0 200 200">
-                    <defs>
-                      <path id={`ring-${i}`} d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0" />
-                    </defs>
-                    <text>
-                      <textPath href={`#ring-${i}`} textLength="489">
-                        {RING_TEXT}
-                      </textPath>
-                    </text>
-                  </svg>
-                  <span className={s.owl}>
-                    <Image src="/images/owl-badge.png" alt="" width={88} height={88} />
-                    <Blink eyes={OWL_EYES.badge} />
-                  </span>
+                  <div className={s.sticker} data-sticker aria-hidden="true">
+                    <div className={s.stickerIn} data-vsticker>
+                      <svg className={s.ring} data-ring viewBox="0 0 200 200">
+                        <defs>
+                          <path id={`ring-${i}`} d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0" />
+                        </defs>
+                        <text>
+                          <textPath href={`#ring-${i}`} textLength="489">
+                            {RING_TEXT}
+                          </textPath>
+                        </text>
+                      </svg>
+                      <span className={s.owl}>
+                        <Image src="/images/owl-badge.png" alt="" width={88} height={88} />
+                        <Blink eyes={OWL_EYES.badge} />
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </article>
-        ))}
+              </article>
+            ))}
+          </div>
+
+          {/* Desktop only: stays in place and rolls to the next number as each value arrives. */}
+          <span className={s.counter} aria-hidden="true">
+            0
+            <span className={s.digits}>
+              <span data-vdigits>
+                {VALUES.map((v, i) => (
+                  <span key={v.title}>{i + 1}</span>
+                ))}
+              </span>
+            </span>
+            <span className={s.of}>/ 0{VALUES.length}</span>
+          </span>
+        </div>
       </div>
 
       {/* Mobile only: where you are in the row; tap a bar to jump to that card. */}

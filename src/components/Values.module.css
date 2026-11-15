@@ -1,16 +1,64 @@
 /*
-  Our philosophy. Desktop: one value per screen, stacked, so scrolling carries each one fully out as the next
-  comes in. Each is a full-bleed photo (a value without one falls back to a flood of brand colour) with big
-  hopping letters, a spinning owl sticker and a tag. Mobile: the same three as a row of cards you swipe
-  through, the next one peeking in at the edge.
+  Our philosophy. Desktop: one full-screen stage that stays put while you scroll; inside it each value's
+  words lift out, its photo slides up and away, and the next value rises in to take its place. Each value is
+  a full-bleed photo (one without falls back to a flood of brand colour) with big hopping letters, a spinning
+  owl sticker and a tag. Mobile: the same three as a row of cards you swipe through, the next peeking in.
 */
+
+/* Four screens tall: the stage holds still for three screens of scroll while the values swap. */
 .values {
   position: relative;
+  height: calc(100svh * 4);
 }
 
+.stage {
+  position: relative;
+  height: 100svh;
+  min-height: 560px;
+  overflow: hidden;
+}
+
+/* Everything on the stage; it dims as the sign-up slides over. */
+.stageIn,
 .layers {
+  position: absolute;
+  inset: 0;
+}
+
+/* The one counter that stays in place while the values change under it. */
+.counter {
+  position: absolute;
+  z-index: 2;
+  top: calc(var(--header-h) + clamp(16px, 4svh, 40px));
+  left: max(24px, 6vw);
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.digits {
+  display: inline-block;
+  height: 1.2em;
+  overflow: hidden;
+  vertical-align: top;
+}
+
+.digits > span {
   display: flex;
   flex-direction: column;
+}
+
+.of {
+  margin-left: 0.25em;
+  opacity: 0.6;
 }
 
 .layer {
@@ -22,15 +70,13 @@
   --sticker-bg: var(--fg);
   --sticker-ink: var(--bg);
   --ring: var(--green);
-  position: relative;
-  height: 100svh;
-  min-height: 560px;
+  position: absolute;
+  inset: 0;
   overflow: hidden;
   background: var(--bg);
   color: var(--text);
 }
 
-/* Everything in a value; the last one dims as the sign-up slides over it. */
 .layerIn {
   position: absolute;
   inset: 0;
@@ -116,6 +162,11 @@
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+/* Desktop shows the stage's own counter in this spot instead; the row keeps its space. */
+.top .count {
+  visibility: hidden;
 }
 
 .count {
@@ -260,10 +311,31 @@
 /* ---------- Mobile: a swipeable row of cards ---------- */
 @media (max-width: 760px) {
   .values {
+    height: auto;
     padding: 64px 0 48px;
   }
 
+  .stage {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .stageIn {
+    position: static;
+  }
+
+  .counter {
+    display: none;
+  }
+
+  .top .count {
+    visibility: visible;
+  }
+
   .layers {
+    position: static;
+    display: flex;
     flex-direction: row;
     gap: 12px;
     padding: 0 16px;
@@ -280,6 +352,8 @@
 
   /* Narrower than the screen, so the next card always shows at the edge. */
   .layer {
+    position: relative;
+    inset: auto;
     flex: 0 0 min(calc(100vw - 64px), 400px);
     height: auto;
     min-height: 0;

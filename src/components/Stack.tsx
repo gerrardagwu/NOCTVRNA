@@ -2,23 +2,25 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type InputHTMLAttributes } from "react";
-import { gsap, SplitText, prefersReducedMotion, useGSAP } from "@/lib/gsap";
+import { gsap, ScrollTrigger, SplitText, prefersReducedMotion, useGSAP } from "@/lib/gsap";
 import { getLenis } from "@/lib/lenis";
 import { useFontsReady } from "@/lib/useFontsReady";
 import Blink, { OWL_EYES } from "./Blink";
 import Experience, { type ExperienceHandle } from "./Experience";
-import Values, { revealValue, settleValue } from "./Values";
+import Values, { hideValue, revealValue, settleValue, swapValues } from "./Values";
 import s from "./Stack.module.css";
 
 /** Experience stage, in timeline seconds: scroll walks the three scenes, then the stage lets go. */
 const EXP = { people: 0.55, atmos: 1.1, end: 1.65 };
+/** Values stage: how long each value rests (timeline seconds) before the next swaps in. */
+const VALUE_REST = 0.35;
 /**
  * Everything after the manifesto, in four parts:
  *  1. Experience: a pinned full-screen scene; scrolling walks Sound, People, Atmosphere.
  *  2. The city: an ordinary section as tall as its content that scrolls in after the Experience scene,
  *     then holds while the values slide up over it.
- *  3. Values: on desktop, three full screens in the normal scroll, each carried fully out as the next comes
- *     in; the last holds while the sign-up slides over it. On mobile, a row of cards you swipe (Values).
+ *  3. Values: on desktop, a full-screen stage that stays put while scrolling swaps the values inside it,
+ *     then holds while the sign-up slides over it. On mobile, a row of cards you swipe (Values).
  *  4. Sign-up: a full screen whose lines rise in as it arrives.
  */
 export default function Stack() {
@@ -132,30 +134,44 @@ export default function Stack() {
           })
           .to(q("[data-city-inner]"), { scale: 0.92, opacity: 0.25, ease: "none" });
 
-        // 3. Values (desktop). Each value is a screen of its own in the normal scroll: its photo settles and its
-        // words arrive as it comes up, and the last one holds while the sign-up slides over it. On mobile the
-        // values are a swipe row instead; Values plays each card's entrance as it comes into view.
+        // 3. Values (desktop). Originality arrives as the stage slides up over the city; then the stage stays put
+        // (pinned) while scrolling swaps the values inside it, and keeps holding while the sign-up slides over.
+        // The values block is taller than the stage by exactly the scroll the swaps get. On mobile the values
+        // are a swipe row instead; Values plays each card's entrance as it comes into view.
         if (desktop) {
-          layers.forEach((layer) => {
-            gsap
-              .timeline({ scrollTrigger: { trigger: layer, start: "top bottom", end: "top top", scrub: 0.6 } })
-              .add(settleValue(layer), 0)
-              .add(revealValue(layer), 0.45);
-          });
-          const last = layers[layers.length - 1];
+          const values = q("[data-values]")[0] as HTMLElement;
+          const run = () => values.offsetHeight - vh();
+          layers.forEach(hideValue);
+
           gsap
-            .timeline({
-              scrollTrigger: {
-                trigger: last,
-                start: "top top",
-                end: () => `+=${vh()}`,
-                pin: true,
-                pinSpacing: false,
-                scrub: true,
-                invalidateOnRefresh: true,
-              },
-            })
-            .to(last.querySelector("[data-vinner]"), { scale: 0.92, opacity: 0.25, ease: "none" });
+            .timeline({ scrollTrigger: { trigger: values, start: "top bottom", end: "top top", scrub: 0.6 } })
+            .add(settleValue(layers[0]), 0)
+            .add(revealValue(layers[0]), 0.45);
+
+          ScrollTrigger.create({
+            trigger: q("[data-vstage]")[0],
+            start: "top top",
+            end: () => `+=${run() + vh()}`,
+            pin: true,
+            pinSpacing: false,
+            invalidateOnRefresh: true,
+          });
+
+          const swaps = gsap.timeline({
+            defaults: { ease: "none" },
+            scrollTrigger: { trigger: values, start: "top top", end: () => `+=${run()}`, scrub, invalidateOnRefresh: true },
+          });
+          const digits = q("[data-vdigits]")[0];
+          let at = VALUE_REST;
+          for (let i = 1; i < layers.length; i++) {
+            swaps.to(digits, { yPercent: (-100 * i) / layers.length, duration: 0.4, ease: "power3.inOut" }, at + 0.4);
+            at = swapValues(swaps, layers[i - 1], layers[i], at) + VALUE_REST;
+          }
+          swaps.to({}, { duration: 0 }, at);
+
+          gsap
+            .timeline({ scrollTrigger: { trigger: values, start: () => `top+=${run()} top`, end: () => `+=${vh()}`, scrub: true, invalidateOnRefresh: true } })
+            .to(q("[data-vstage-in]"), { scale: 0.92, opacity: 0.25, ease: "none" });
         }
 
         // 4. Sign-up: the lines rise in and the form follows as it arrives.

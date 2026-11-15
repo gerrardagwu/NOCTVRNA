@@ -29,14 +29,14 @@ npm run build && npm start
 | Beyond the ordinary | The heading stays put while the copy scrolls past; when the copy runs out they leave together. The lead paragraph lights up word by word. | `src/components/Manifesto.tsx` |
 | Sound / People / Atmosphere | Full-screen scene. Scroll (or hover/tap a word) to change the photo: it fades up with a slow push-in and drifts gently against the cursor. | `src/components/Experience.tsx` |
 | The city | Headline, a body-size line with the highlights, and event details (date, city, doors) on the left; the backlit poster on the right (stacked on mobile). The poster leans toward the cursor. It holds once it reaches the top and the whole poster is in view, while the values slide over it. | `src/components/Stack.tsx` |
-| Our philosophy | Desktop: Originality, Freedom of Expression and Intentional Curation are a full screen each, one after another in the normal scroll; as each comes up its photo settles from a slow push-in and its words spring in. The last holds while the sign-up slides over it. Mobile: the three are a row of cards you swipe (snapping, the next card peeking in at the edge), with progress bars underneath that you can tap; each card plays its entrance when it comes into view. Letters hop under the cursor, the spinning owl sticker speeds up and drifts toward you, the photo drifts the other way. | `src/components/Values.tsx` |
+| Our philosophy | Desktop: one full-screen stage that stays put while you scroll through Originality, Freedom of Expression and Intentional Curation. Inside it, each value's words lift out, its photo slides up and away as the next rises in from below, and the new words spring up; each value rests for a beat before the next swap, and the counter in the corner rolls 01, 02, 03. The stage keeps holding while the sign-up slides over it. Mobile: the three are a row of cards you swipe (snapping, the next card peeking in at the edge), with progress bars underneath that you can tap; each card plays its entrance when it comes into view. Letters hop under the cursor, the spinning owl sticker speeds up and drifts toward you, the photo drifts the other way. | `src/components/Values.tsx` |
 | Sign-up | Slides over the last value; lines rise in, the glow breathes. Name and email are checked on submit: a problem turns that field's label and line red with the reason underneath, and clears as soon as it's fixed. A good submit opens a ticket (the guest's name, date, city, an ON THE LIST stamp) in a dialog; Esc, the backdrop or the buttons close it. | `src/components/Stack.tsx` |
 | Footer | Scrolls in after the stage releases. | `src/components/Footer.tsx` |
 
 After the manifesto (`src/components/Stack.tsx`): the Experience scene is pinned full-screen while scroll walks its
 three photos (`EXP` at the top of that file sets where each beat falls); the city section is as tall as its content
-and scrolls in normally after it, then holds while the values slide up over it. The values and the sign-up are in the
-normal scroll.
+and scrolls in normally after it, then holds while the values slide up over it. On desktop the values stage is pinned
+while it swaps its contents (`VALUE_REST` sets how long each value rests); the sign-up then slides over it.
 
 All motion respects `prefers-reduced-motion`.
 
