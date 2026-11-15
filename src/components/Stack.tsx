@@ -56,24 +56,20 @@ export default function Stack() {
         .from(q("[data-exp-word]"), { yPercent: 60, opacity: 0, stagger: 0.08, duration: 0.5, ease: "power2.out" }, 0.25)
         .from(q("[data-exp-stage]"), { scale: 0.86, yPercent: 12, opacity: 0.2, duration: 0.7, ease: "power2.out" }, 0.2);
 
-      // The poster leans toward the cursor; the giant words behind it lean away, for depth.
+      // The poster leans toward the cursor.
       const posterArea = q("[data-poster-area]")[0] as HTMLElement;
-      const backdrop = q("[data-city-backdrop]")[0]?.parentElement as HTMLElement;
       const px = gsap.quickTo(posterArea, "x", { duration: 1, ease: "power3.out" });
       const py = gsap.quickTo(posterArea, "y", { duration: 1, ease: "power3.out" });
-      const bx = gsap.quickTo(backdrop, "x", { duration: 1.2, ease: "power3.out" });
       const onCityMove = (e: PointerEvent) => {
         if (e.pointerType !== "mouse" || reduce) return;
         const nx = e.clientX / window.innerWidth - 0.5;
         const ny = e.clientY / window.innerHeight - 0.5;
         px(nx * 18);
         py(ny * 14);
-        bx(nx * -40);
       };
       const onCityLeave = () => {
         px(0);
         py(0);
-        bx(0);
       };
       city.addEventListener("pointermove", onCityMove);
       city.addEventListener("pointerleave", onCityLeave);
@@ -120,18 +116,12 @@ export default function Stack() {
         });
         exp.to({}, { duration: EXP.end });
 
-        // 2. The city: words, details and poster arrive as it scrolls in; the giant LAGOS AFTER DARK behind
-        // them drifts across as you pass.
+        // 2. The city: words, details and poster arrive as it scrolls in.
         gsap
           .timeline({ scrollTrigger: { trigger: city, start: "top bottom", end: "top 10%", scrub: 0.6 } })
           .fromTo(headline.words, { opacity: 0.08, yPercent: 40 }, { opacity: 1, yPercent: 0, stagger: 0.03, duration: 0.6, ease: "none" })
           .fromTo(q("[data-city-lede]"), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 0.35)
           .fromTo(q("[data-city-facts] > div"), { opacity: 0, y: 24 }, { opacity: 1, y: 0, stagger: 0.08, duration: 0.4, ease: "power2.out" }, 0.5);
-        gsap.fromTo(
-          q("[data-city-backdrop]"),
-          { xPercent: 6 },
-          { xPercent: -6, ease: "none", scrollTrigger: { trigger: city, start: "top bottom", end: "bottom top", scrub: true } },
-        );
         gsap.fromTo(
           q("[data-poster]"),
           { yPercent: 14, scale: 0.88, rotateX: 14 },
@@ -218,9 +208,6 @@ export default function Stack() {
       <div className={s.cityWrap}>
         <section className={s.city} data-city aria-labelledby="city-title">
           <div className={s.cityInner} data-city-inner>
-            <p className={s.backdrop} aria-hidden="true">
-              <span data-city-backdrop>LAGOS AFTER DARK</span>
-            </p>
             <div className={s.cityCopy}>
               <h2 id="city-title" className={s.headline} data-city-headline>
                 The city never really sleeps, so neither do we.

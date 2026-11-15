@@ -27,8 +27,8 @@
 }
 
 /* ---------- The city never really sleeps ----------
-   Desktop: the headline and the event details on the left, the poster on the right, and a huge faint
-   LAGOS AFTER DARK running behind both. Mobile: the same, stacked, poster as wide as the text. */
+   Desktop: the headline and the event details on the left, the poster on the right.
+   Mobile: the same, stacked, poster as wide as the text. */
 .cityWrap {
   position: relative;
   z-index: 2;
@@ -52,26 +52,6 @@
   padding-right: max(24px, 6vw, env(safe-area-inset-right, 0px));
   perspective: 1200px;
   transform-origin: 50% 100%;
-}
-
-.backdrop {
-  position: absolute;
-  inset: 50% 0 auto;
-  z-index: 0;
-  translate: 0 -50%; /* separate from transform, which the cursor parallax drives */
-  text-align: center;
-  white-space: nowrap;
-  pointer-events: none;
-  user-select: none;
-}
-
-.backdrop span {
-  display: inline-block;
-  font-family: var(--font-anton), sans-serif;
-  font-size: clamp(120px, 19vw, 340px);
-  line-height: 0.82;
-  letter-spacing: -0.02em;
-  color: rgb(195 139 239 / 0.07);
 }
 
 .cityCopy {
@@ -348,15 +328,6 @@
   .posterArea {
     justify-self: stretch;
     width: 100%;
-  }
-
-  .backdrop {
-    inset: auto 0 22%;
-    translate: none;
-  }
-
-  .backdrop span {
-    font-size: 38vw;
   }
 
   .enterInner {
