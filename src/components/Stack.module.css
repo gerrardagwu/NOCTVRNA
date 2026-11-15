@@ -249,10 +249,11 @@
   color: var(--ink);
 }
 
-/* Desktop: fields and button on one row, the consent line under it (room left between for a field error). */
+/* Desktop: fields and button on one centred row, the consent line centred under it (room left between for a field error). */
 .form {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   align-items: flex-end;
   gap: 0 40px;
 }
@@ -277,6 +278,7 @@
   position: relative;
   flex-basis: 100%;
   display: flex;
+  justify-content: center;
   align-items: flex-start;
   gap: 12px;
   margin-top: 60px; /* clears a two-line field error */
@@ -288,10 +290,9 @@
 }
 
 .consent label {
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 0;
   cursor: pointer;
-  max-width: 62ch;
 }
 
 .consent input {
@@ -325,7 +326,7 @@
 .consent .error {
   top: auto;
   bottom: 4px;
-  left: 32px;
+  justify-content: center;
 }
 
 /* For bots only: off-screen rather than display:none, which some bots skip. */
@@ -849,13 +850,19 @@
 
   .consent {
     order: 0;
+    justify-content: flex-start;
     margin-top: 0;
     padding-bottom: 0;
     flex-wrap: wrap;
   }
 
+  .consent label {
+    flex: 1;
+  }
+
   .consent .error {
     flex-basis: 100%;
+    justify-content: flex-start;
     margin-top: 0;
     padding-left: 32px;
   }
