@@ -163,7 +163,7 @@
 .owl {
   position: absolute;
   left: calc(50% - 230 * var(--u));
-  top: calc(-38 * var(--u));
+  top: calc(362 * var(--u));
   width: calc(460 * var(--u));
   aspect-ratio: 1024 / 390;
 }
@@ -185,7 +185,7 @@
 .logo {
   position: absolute;
   left: calc(50% - 465 * var(--u));
-  top: calc(100 * var(--u));
+  top: calc(26 * var(--u));
   width: calc(931 * var(--u));
   height: calc(343 * var(--u));
   display: block;
@@ -219,7 +219,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(371 * var(--u));
+  top: calc(297 * var(--u));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -248,7 +248,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(548 * var(--u));
+  top: calc(556 * var(--u));
   text-align: center;
   font-family: var(--font-bunch), sans-serif;
   font-weight: 700;
@@ -263,7 +263,7 @@
 .cdWrap {
   position: absolute;
   left: calc(50% - 284 * var(--u));
-  top: calc(598 * var(--u));
+  top: calc(604 * var(--u));
   transform-origin: 0 0;
   will-change: transform;
 }
@@ -310,21 +310,22 @@
     height: 100%;
   }
 
+  /* Logo and taglines at the top, the owl centred in the space between them and the countdown. */
   .owl {
-    top: 9%;
-    left: 12vw;
-    width: 76vw;
+    top: calc(48% - 5.7vw + 10px);
+    left: 9vw;
+    width: 82vw;
   }
 
   .logo {
-    top: calc(9% + 25vw);
+    top: 9%;
     left: 4vw;
     width: 92vw;
     height: calc(92vw / 2.714);
   }
 
   .caption {
-    top: calc(9% + 59vw + 8px);
+    top: calc(9% + 33.9vw + 8px);
     gap: 4px;
   }
 
@@ -336,9 +337,10 @@
     font-size: 15px;
   }
 
+  /* 12px above the countdown, whose height is 96 card units (70 card + 4 gap + 22 label). */
   .cdTitle {
     top: auto;
-    bottom: calc(13% + 92px);
+    bottom: calc(13% + 96 * 100vw / 680 + 12px);
     font-size: 18px;
     line-height: 26px;
   }

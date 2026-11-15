@@ -26,7 +26,9 @@
   background: var(--night);
 }
 
-/* ---------- The city never really sleeps: as tall as its content, poster up front ---------- */
+/* ---------- The city never really sleeps ----------
+   Desktop: the headline and the event details on the left, the poster on the right, and a huge faint
+   LAGOS AFTER DARK running behind both. Mobile: the same, stacked, poster as wide as the text. */
 .cityWrap {
   position: relative;
   z-index: 2;
@@ -34,30 +36,72 @@
 
 .city {
   position: relative;
+  overflow: hidden;
   background: var(--night);
 }
 
 .cityInner {
-  --pw: clamp(240px, 32vw, 480px); /* poster width */
-  display: flex;
-  flex-direction: column;
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
   align-items: center;
-  gap: clamp(48px, 7vh, 80px);
-  padding: calc(var(--header-h) + clamp(48px, 9vh, 104px)) 0 clamp(80px, 12vh, 140px);
+  column-gap: clamp(40px, 6vw, 112px);
+  padding-top: calc(var(--header-h) + clamp(56px, 10vh, 120px));
+  padding-bottom: clamp(80px, 12vh, 140px);
+  padding-left: max(24px, 6vw, env(safe-area-inset-left, 0px));
+  padding-right: max(24px, 6vw, env(safe-area-inset-right, 0px));
   perspective: 1200px;
   transform-origin: 50% 100%;
 }
 
-/* Same tracking and leading as the other big Anton headings, and the same 6vw content edges, so it
-   reads as one of them rather than a squeezed paragraph. */
+.backdrop {
+  position: absolute;
+  inset: 50% 0 auto;
+  z-index: 0;
+  translate: 0 -50%; /* separate from transform, which the cursor parallax drives */
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+.backdrop span {
+  display: inline-block;
+  font-family: var(--font-anton), sans-serif;
+  font-size: clamp(120px, 19vw, 340px);
+  line-height: 0.82;
+  letter-spacing: -0.02em;
+  color: rgb(195 139 239 / 0.07);
+}
+
+.cityCopy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.eyebrow {
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: var(--brand);
+  color: var(--deep);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -0.02em;
+  margin-bottom: clamp(18px, 3vh, 32px);
+}
+
+/* Same tracking and leading as the other big Anton headings. */
 .headline {
-  width: min(1240px, calc(100% - max(48px, 12vw)));
   font-family: var(--font-anton), sans-serif;
   font-weight: 400;
-  font-size: clamp(32px, 4.6vw, 78px);
+  font-size: clamp(34px, 4.2vw, 72px);
   line-height: 1;
   letter-spacing: -0.02em;
-  text-align: center;
   color: var(--ink);
   text-wrap: balance;
 }
@@ -66,18 +110,54 @@
   color: var(--brand);
 }
 
+/* The essentials, set like the details on a ticket. */
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px clamp(28px, 4vw, 56px);
+  margin: clamp(28px, 5vh, 48px) 0 0;
+  padding-top: 22px;
+  border-top: 1px solid rgb(245 241 229 / 0.14);
+}
+
+.facts dt {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(245 241 229 / 0.5);
+}
+
+.facts dd {
+  margin: 6px 0 0;
+  font-family: var(--font-anton), sans-serif;
+  font-size: clamp(22px, 2.2vw, 32px);
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+
 .posterArea {
   position: relative;
-  width: var(--pw);
+  z-index: 1;
+  justify-self: end;
+  width: min(100%, 460px);
   aspect-ratio: 458 / 537;
-  max-width: 100%;
+}
+
+/* A soft purple light behind the poster, as if it's lit from the back. */
+.posterGlow {
+  position: absolute;
+  inset: -18%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(195 139 239 / 0.28), rgb(195 139 239 / 0));
+  pointer-events: none;
 }
 
 .poster {
   position: absolute;
   inset: 0;
   z-index: 1;
-  box-shadow: 0 4px 60px rgb(232 182 249 / 0.25);
+  box-shadow: 0 30px 80px -30px rgb(0 0 0 / 0.8), 0 4px 60px rgb(232 182 249 / 0.2);
   transform-origin: 50% 100%;
   overflow: hidden;
 }
@@ -254,13 +334,31 @@
 
 @media (max-width: 760px) {
   .cityInner {
-    /* As wide as the headline above it: the screen less the same side margins. */
-    --pw: calc(100% - max(48px, 12vw));
-    gap: 64px;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 48px;
   }
 
   .headline {
-    font-size: clamp(28px, 8.2vw, 36px);
+    font-size: clamp(30px, 8.6vw, 40px);
+  }
+
+  .eyebrow {
+    font-size: 13px;
+  }
+
+  /* As wide as the text above it. */
+  .posterArea {
+    justify-self: stretch;
+    width: 100%;
+  }
+
+  .backdrop {
+    inset: auto 0 22%;
+    translate: none;
+  }
+
+  .backdrop span {
+    font-size: 38vw;
   }
 
   .enterInner {

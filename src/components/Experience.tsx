@@ -121,11 +121,6 @@ export default function Experience({ ref }: { ref?: Ref<ExperienceHandle> }) {
                   </span>
                 ))}
               </span>
-              <span className={s.eq} aria-hidden="true">
-                <i />
-                <i />
-                <i />
-              </span>
             </button>
           ))}
         </div>

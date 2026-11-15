@@ -56,6 +56,28 @@ export default function Stack() {
         .from(q("[data-exp-word]"), { yPercent: 60, opacity: 0, stagger: 0.08, duration: 0.5, ease: "power2.out" }, 0.25)
         .from(q("[data-exp-stage]"), { scale: 0.86, yPercent: 12, opacity: 0.2, duration: 0.7, ease: "power2.out" }, 0.2);
 
+      // The poster leans toward the cursor; the giant words behind it lean away, for depth.
+      const posterArea = q("[data-poster-area]")[0] as HTMLElement;
+      const backdrop = q("[data-city-backdrop]")[0]?.parentElement as HTMLElement;
+      const px = gsap.quickTo(posterArea, "x", { duration: 1, ease: "power3.out" });
+      const py = gsap.quickTo(posterArea, "y", { duration: 1, ease: "power3.out" });
+      const bx = gsap.quickTo(backdrop, "x", { duration: 1.2, ease: "power3.out" });
+      const onCityMove = (e: PointerEvent) => {
+        if (e.pointerType !== "mouse" || reduce) return;
+        const nx = e.clientX / window.innerWidth - 0.5;
+        const ny = e.clientY / window.innerHeight - 0.5;
+        px(nx * 18);
+        py(ny * 14);
+        bx(nx * -40);
+      };
+      const onCityLeave = () => {
+        px(0);
+        py(0);
+        bx(0);
+      };
+      city.addEventListener("pointermove", onCityMove);
+      city.addEventListener("pointerleave", onCityLeave);
+
       // One value's entrance: letters spring up, the tag slaps on, the sticker spins in, the copy follows.
       const reveal = (layer: Element) =>
         gsap
@@ -98,10 +120,17 @@ export default function Stack() {
         });
         exp.to({}, { duration: EXP.end });
 
-        // 2. The city: words and poster arrive as it scrolls in.
+        // 2. The city: words, details and poster arrive as it scrolls in; the giant LAGOS AFTER DARK behind
+        // them drifts across as you pass.
         gsap
           .timeline({ scrollTrigger: { trigger: city, start: "top bottom", end: "top 10%", scrub: 0.6 } })
-          .fromTo(headline.words, { opacity: 0.08, yPercent: 40 }, { opacity: 1, yPercent: 0, stagger: 0.02, duration: 0.6, ease: "none" });
+          .fromTo(headline.words, { opacity: 0.08, yPercent: 40 }, { opacity: 1, yPercent: 0, stagger: 0.02, duration: 0.6, ease: "none" })
+          .fromTo(q("[data-city-facts] > div"), { opacity: 0, y: 24 }, { opacity: 1, y: 0, stagger: 0.08, duration: 0.4, ease: "power2.out" }, 0.45);
+        gsap.fromTo(
+          q("[data-city-backdrop]"),
+          { xPercent: 6 },
+          { xPercent: -6, ease: "none", scrollTrigger: { trigger: city, start: "top bottom", end: "bottom top", scrub: true } },
+        );
         gsap.fromTo(
           q("[data-poster]"),
           { yPercent: 14, scale: 0.88, rotateX: 14 },
@@ -110,12 +139,17 @@ export default function Stack() {
         // ...then it holds while the values slide over it. It only holds once the section has reached the top of
         // the screen; where the poster runs past the bottom it scrolls on to show it, but never so far that the
         // headline slips under the header. So the headline and poster are never covered part-way down the screen.
-        const posterArea = q("[data-poster-area]")[0] as HTMLElement;
         const headlineEl = q("[data-city-headline]")[0] as HTMLElement;
         const headerH = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-h")) || 76;
+        // Layout offset from the top of the city section (offsets ignore the scroll transforms).
+        const fromCityTop = (el: HTMLElement) => {
+          let y = 0;
+          for (let n: HTMLElement | null = el; n && n !== city; n = n.offsetParent as HTMLElement | null) y += n.offsetTop;
+          return y;
+        };
         const holdOffset = () => {
-          const showPoster = posterArea.offsetTop + posterArea.offsetHeight + 16 - vh();
-          const keepHeadline = headlineEl.offsetTop - headerH() - 8;
+          const showPoster = fromCityTop(posterArea) + posterArea.offsetHeight + 16 - vh();
+          const keepHeadline = fromCityTop(headlineEl) - headerH() - 8;
           return Math.max(0, Math.min(showPoster, keepHeadline));
         };
         gsap
@@ -168,6 +202,8 @@ export default function Stack() {
       });
 
       return () => {
+        city.removeEventListener("pointermove", onCityMove);
+        city.removeEventListener("pointerleave", onCityLeave);
         mm.revert();
         glow.kill();
         headline.revert();
@@ -187,12 +223,33 @@ export default function Stack() {
       <div className={s.cityWrap}>
         <section className={s.city} data-city aria-labelledby="city-title">
           <div className={s.cityInner} data-city-inner>
-            <h2 id="city-title" className={s.headline} data-city-headline>
-              The city never really sleeps, so neither do we. One night built around the{" "}
-              <span className={s.hl}>sound</span>, the <span className={s.hl}>people</span> and the{" "}
-              <span className={s.hl}>glow of Lagos after dark</span>
-            </h2>
+            <p className={s.backdrop} aria-hidden="true">
+              <span data-city-backdrop>LAGOS AFTER DARK</span>
+            </p>
+            <div className={s.cityCopy}>
+              <p className={s.eyebrow}>This December</p>
+              <h2 id="city-title" className={s.headline} data-city-headline>
+                The city never really sleeps, so neither do we. One night built around the{" "}
+                <span className={s.hl}>sound</span>, the <span className={s.hl}>people</span> and the{" "}
+                <span className={s.hl}>glow of Lagos after dark</span>
+              </h2>
+              <dl className={s.facts} data-city-facts>
+                <div>
+                  <dt>Date</dt>
+                  <dd>12.12.26</dd>
+                </div>
+                <div>
+                  <dt>City</dt>
+                  <dd>Lagos</dd>
+                </div>
+                <div>
+                  <dt>Doors</dt>
+                  <dd>After dark</dd>
+                </div>
+              </dl>
+            </div>
             <div className={s.posterArea} data-poster-area>
+              <div className={s.posterGlow} aria-hidden="true" />
               <div className={s.poster} data-poster>
                 <div className={s.posterArt}>
                   <Image
