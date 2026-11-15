@@ -45,28 +45,58 @@ export class BrevoError extends Error {
   }
 }
 
+const RETRY_DELAYS_MS = [250, 700];
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Worth trying again? Rate limits, and Brevo's occasional stray "permission_denied" (seen on a fraction of
+ * requests right after a key's permissions change), mean the request wasn't acted on, so any call can retry.
+ * Server errors and network failures might have half-happened, so only reads and updates (GET/PUT) retry
+ * then; creating a contact or sending an email never risks happening twice.
+ */
+function retryable(method: string, status: number, code: string) {
+  if (status === 429 || (status === 403 && code === "permission_denied")) return true;
+  return method !== "POST" && (status >= 500 || status === 0);
+}
+
 async function call<T>(config: BrevoConfig, method: string, path: string, body?: unknown): Promise<{ status: number; data: T | null }> {
-  const res = await fetch(`${API}${path}`, {
-    method,
-    headers: {
-      "api-key": config.apiKey,
-      accept: "application/json",
-      ...(body ? { "content-type": "application/json" } : {}),
-    },
-    body: body ? JSON.stringify(body) : undefined,
-    cache: "no-store",
-    signal: AbortSignal.timeout(TIMEOUT_MS),
-  });
-  const text = await res.text();
-  let data: unknown = null;
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {
-    data = null;
+  for (let attempt = 0; ; attempt++) {
+    let status = 0;
+    let data: unknown = null;
+    try {
+      const res = await fetch(`${API}${path}`, {
+        method,
+        headers: {
+          "api-key": config.apiKey,
+          accept: "application/json",
+          ...(body ? { "content-type": "application/json" } : {}),
+        },
+        body: body ? JSON.stringify(body) : undefined,
+        cache: "no-store",
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      });
+      status = res.status;
+      const text = await res.text();
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch {
+        data = null;
+      }
+      if (res.ok || res.status === 404) return { status: res.status, data: data as T | null };
+    } catch (e) {
+      // Network failure or timeout: status stays 0.
+      if (attempt >= RETRY_DELAYS_MS.length || !retryable(method, 0, "")) throw e;
+      await wait(RETRY_DELAYS_MS[attempt]);
+      continue;
+    }
+    const err = (data ?? {}) as { code?: string; message?: string };
+    const code = err.code ?? "unknown";
+    if (attempt < RETRY_DELAYS_MS.length && retryable(method, status, code)) {
+      await wait(RETRY_DELAYS_MS[attempt]);
+      continue;
+    }
+    throw new BrevoError(status, code, err.message ?? `HTTP ${status}`);
   }
-  if (res.ok || res.status === 404) return { status: res.status, data: data as T | null };
-  const err = (data ?? {}) as { code?: string; message?: string };
-  throw new BrevoError(res.status, err.code ?? "unknown", err.message ?? res.statusText);
 }
 
 type Contact = {
