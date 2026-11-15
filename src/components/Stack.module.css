@@ -83,19 +83,7 @@
   min-width: 0;
 }
 
-.eyebrow {
-  display: inline-block;
-  padding: 8px 18px;
-  border-radius: 999px;
-  background: var(--brand);
-  color: var(--deep);
-  font-weight: 700;
-  font-size: 15px;
-  letter-spacing: -0.02em;
-  margin-bottom: clamp(18px, 3vh, 32px);
-}
-
-/* Four clear steps: label, headline, a body-size line that carries the highlights, then the details. */
+/* Three clear steps: headline, a body-size line that carries the highlights, then the details. */
 .headline {
   max-width: 13ch;
   font-family: var(--font-anton), sans-serif;
@@ -354,10 +342,6 @@
 
   .lede {
     font-size: 16px;
-  }
-
-  .eyebrow {
-    font-size: 13px;
   }
 
   /* As wide as the text above it. */

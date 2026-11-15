@@ -222,7 +222,6 @@ export default function Stack() {
               <span data-city-backdrop>LAGOS AFTER DARK</span>
             </p>
             <div className={s.cityCopy}>
-              <p className={s.eyebrow}>This December</p>
               <h2 id="city-title" className={s.headline} data-city-headline>
                 The city never really sleeps, so neither do we.
               </h2>
