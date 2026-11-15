@@ -224,7 +224,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(700 * var(--u));
+  top: calc(660 * var(--u));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -253,7 +253,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(782 * var(--u));
+  top: calc(742 * var(--u));
   text-align: center;
   font-family: var(--font-bunch), sans-serif;
   font-weight: 700;
@@ -264,13 +264,12 @@
   white-space: pre;
 }
 
-/* Four groups of 124 card units with 24 unit gaps: 568 wide. The cards run at 0.56 of a design pixel
-   here so the whole poster stack fits on one screen. */
+/* Four groups of 124 card units with 24 unit gaps: 568 wide, 96 tall, at full design size on desktop. */
 .cdWrap {
-  --cdu: calc(var(--u) * 0.56);
+  --cdu: var(--u);
   position: absolute;
   left: calc(50% - 284 * var(--cdu));
-  top: calc(828 * var(--u));
+  top: calc(788 * var(--u));
   transform-origin: 0 0;
   will-change: transform;
 }
