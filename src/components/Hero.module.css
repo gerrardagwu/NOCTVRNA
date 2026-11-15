@@ -168,13 +168,17 @@
   aspect-ratio: 1024 / 390;
 }
 
+/* The artwork's darks are keyed out (owl-face.webp carries its own alpha), so the night and the city
+   behind show through the shadows; an oval fade then dissolves the band's edges entirely, leaving a face
+   that emerges from the dark rather than a strip laid on top of it. */
 .owlInner {
   position: relative;
   width: 100%;
   height: 100%;
   mask-image:
-    linear-gradient(90deg, transparent 0%, #000 9%, #000 91%, transparent 100%),
-    linear-gradient(180deg, transparent 0%, #000 22%, #000 60%, transparent 100%);
+    radial-gradient(ellipse 58% 70% at 50% 46%, #000 52%, transparent 100%),
+    linear-gradient(90deg, transparent 0%, #000 12%, #000 88%, transparent 100%),
+    linear-gradient(180deg, transparent 0%, #000 26%, #000 58%, transparent 100%);
   mask-composite: intersect;
 }
 

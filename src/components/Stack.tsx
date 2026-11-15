@@ -124,8 +124,9 @@ export default function Stack() {
         // them drifts across as you pass.
         gsap
           .timeline({ scrollTrigger: { trigger: city, start: "top bottom", end: "top 10%", scrub: 0.6 } })
-          .fromTo(headline.words, { opacity: 0.08, yPercent: 40 }, { opacity: 1, yPercent: 0, stagger: 0.02, duration: 0.6, ease: "none" })
-          .fromTo(q("[data-city-facts] > div"), { opacity: 0, y: 24 }, { opacity: 1, y: 0, stagger: 0.08, duration: 0.4, ease: "power2.out" }, 0.45);
+          .fromTo(headline.words, { opacity: 0.08, yPercent: 40 }, { opacity: 1, yPercent: 0, stagger: 0.03, duration: 0.6, ease: "none" })
+          .fromTo(q("[data-city-lede]"), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 0.35)
+          .fromTo(q("[data-city-facts] > div"), { opacity: 0, y: 24 }, { opacity: 1, y: 0, stagger: 0.08, duration: 0.4, ease: "power2.out" }, 0.5);
         gsap.fromTo(
           q("[data-city-backdrop]"),
           { xPercent: 6 },
@@ -137,21 +138,15 @@ export default function Stack() {
           { yPercent: 0, scale: 1, rotateX: 0, ease: "power2.out", scrollTrigger: { trigger: q("[data-poster-area]")[0], start: "top bottom", end: "top 35%", scrub: 0.6 } },
         );
         // ...then it holds while the values slide over it. It only holds once the section has reached the top of
-        // the screen; where the poster runs past the bottom it scrolls on to show it, but never so far that the
-        // headline slips under the header. So the headline and poster are never covered part-way down the screen.
-        const headlineEl = q("[data-city-headline]")[0] as HTMLElement;
-        const headerH = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-h")) || 76;
+        // the screen, and where the poster runs past the bottom (mobile) it scrolls on until the whole poster is
+        // in view, so nothing is covered while it's still on its way up.
         // Layout offset from the top of the city section (offsets ignore the scroll transforms).
         const fromCityTop = (el: HTMLElement) => {
           let y = 0;
           for (let n: HTMLElement | null = el; n && n !== city; n = n.offsetParent as HTMLElement | null) y += n.offsetTop;
           return y;
         };
-        const holdOffset = () => {
-          const showPoster = fromCityTop(posterArea) + posterArea.offsetHeight + 16 - vh();
-          const keepHeadline = fromCityTop(headlineEl) - headerH() - 8;
-          return Math.max(0, Math.min(showPoster, keepHeadline));
-        };
+        const holdOffset = () => Math.max(0, fromCityTop(posterArea) + posterArea.offsetHeight + 16 - vh());
         gsap
           .timeline({
             scrollTrigger: {
@@ -229,10 +224,12 @@ export default function Stack() {
             <div className={s.cityCopy}>
               <p className={s.eyebrow}>This December</p>
               <h2 id="city-title" className={s.headline} data-city-headline>
-                The city never really sleeps, so neither do we. One night built around the{" "}
-                <span className={s.hl}>sound</span>, the <span className={s.hl}>people</span> and the{" "}
-                <span className={s.hl}>glow of Lagos after dark</span>
+                The city never really sleeps, so neither do we.
               </h2>
+              <p className={s.lede} data-city-lede>
+                One night built around the <span className={s.hl}>sound</span>, the{" "}
+                <span className={s.hl}>people</span> and the <span className={s.hl}>glow of Lagos after dark</span>.
+              </p>
               <dl className={s.facts} data-city-facts>
                 <div>
                   <dt>Date</dt>
