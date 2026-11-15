@@ -20,11 +20,10 @@ npm run build && npm start
 
 | Section | Behaviour | File |
 | --- | --- | --- |
-| Loader | The owl from the Figma "Loader" frame fades up, its eyes glow, and it lifts once fonts and images are in. | `src/components/Loader.tsx` |
-| Hero | Full screen. The NOCTVRNA logo switches on like a tube light catching (flicker, then a steady glow with a faint hum), and the city lights up behind it. | `src/components/Hero.tsx` |
+| Hero | Full screen, straight away (there's no preloader). As soon as the fonts are in, the NOCTVRNA logo switches on like a tube light catching (flicker, then a steady glow with a faint hum), and the city lights up behind it. | `src/components/Hero.tsx` |
 | Countdown | Live split-flap countdown to 12 December 2026 (days, hours, minutes, seconds). The cards swing open, cascade through the digits like a calendar, then every tick lifts the bottom flap up and over. Each tick is scheduled for the moment the second changes and read fresh from the clock, which is corrected against the server's time (`/api/time`), so a phone set to the wrong time still counts down correctly. Coming back to a background tab jumps straight to the right time. | `src/components/FlipDigit.tsx`, `Countdown.tsx`, `src/lib/clock.ts` |
 | Header | As the hero scrolls away, the logo shrinks into a sticky, translucent header on the left, with the Get Access ticket on the right (it scrolls to the sign-up). The countdown shrinks into the middle of the header on desktop, and into a small tab just below the header on mobile. The owl stays in the hero and fades with it. Clicking anywhere else in the header scrolls back to the top. | `src/components/Hero.tsx`, `src/lib/scrollTo.ts` |
-| Blinking owl | The owl's own eyelid skin (cut from the teaser video's blink, `lid-left.png` / `lid-right.png`) slides down over each eye every few seconds, sometimes twice: hero/header badge, poster, values sticker and loader. Eye positions are in `OWL_EYES`. | `src/components/Blink.tsx` |
+| Blinking owl | The owl's own eyelid skin (cut from the teaser video's blink, `lid-left.png` / `lid-right.png`) slides down over each eye every few seconds, sometimes twice: hero, poster, values stickers and the sign-up ticket. Eye positions are in `OWL_EYES`. | `src/components/Blink.tsx` |
 | Purple strip | Endless marquee. It always drifts, speeds up when you scroll and reverses when you scroll up. The words are Bunch Bold outlines exported from the Figma strip, so they match the design before the font is installed. | `src/components/Strip.tsx`, `stripWords.ts` |
 | Beyond the ordinary | The heading stays put while the copy scrolls past; when the copy runs out they leave together. The lead paragraph lights up word by word. | `src/components/Manifesto.tsx` |
 | Sound / People / Atmosphere | Full-screen scene. Scroll (or hover/tap a word) to change the photo: it fades up with a slow push-in and drifts gently against the cursor. | `src/components/Experience.tsx` |
@@ -72,7 +71,7 @@ All motion respects `prefers-reduced-motion`.
 ## Assets
 
 Everything in `public/images` except the photos was exported from the Figma file: hero background, logo, owl badge,
-strip owl, loader owl, poster, and the six flip-card shapes (`flip-1.svg` to `flip-6.svg`).
+strip owl, poster, and the six flip-card shapes (`flip-1.svg` to `flip-6.svg`).
 
 Photos: `exp-sound.jpg`, `exp-people.jpg`, `exp-atmosphere.jpg` (Experience stage), `value-originality.jpg` (the
 bridge poster with its title, logo and carousel marks retouched out), `value-freedom.jpg` (app icons cropped off) and

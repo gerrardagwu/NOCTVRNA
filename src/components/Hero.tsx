@@ -111,7 +111,7 @@ export default function Hero({ play }: { play: boolean }) {
     { scope: root },
   );
 
-  // Intro once the loader lifts: the logo switches on like a tube light catching, then the rest follows.
+  // Intro once the page is ready: the logo switches on like a tube light catching, then the rest follows.
   useGSAP(
     () => {
       if (!play) return;

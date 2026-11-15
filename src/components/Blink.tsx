@@ -12,10 +12,6 @@ export const OWL_EYES = {
     { x: 19.3, y: 53.4, w: 28, h: 22 },
     { x: 81.2, y: 53.6, w: 29, h: 21 },
   ],
-  loader: [
-    { x: 19.7, y: 52.6, w: 28, h: 23 },
-    { x: 81.4, y: 53.6, w: 29, h: 21 },
-  ],
   // The wide band of the owl's face used in the hero and header (cut from the poster art).
   face: [
     { x: 19.5, y: 41.0, w: 28, h: 39.2 },

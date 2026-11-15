@@ -33,7 +33,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`${anton.variable} ${dmSans.variable} ${bunch.variable} ${neuvorte.variable}`}>
       <body>
         <noscript>
-          <style>{`[data-intro]{opacity:1!important}[data-loader]{display:none!important}`}</style>
+          <style>{`[data-intro]{opacity:1!important}`}</style>
         </noscript>
         {children}
       </body>
