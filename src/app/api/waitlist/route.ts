@@ -133,7 +133,7 @@ export async function POST(request: Request) {
   // On the list. The confirmation is a bonus: if it fails, they're still registered.
   let emailSent = false;
   try {
-    const mail = confirmationEmail({ firstName, siteUrl: SITE_URL });
+    const mail = confirmationEmail({ firstName, siteUrl: SITE_URL, senderEmail: config.senderEmail });
     await sendEmail(config, {
       to: { email: address, name: cleanName(name) },
       subject: mail.subject,

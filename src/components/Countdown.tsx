@@ -2,11 +2,9 @@
 
 import { useEffect, useImperativeHandle, useRef, type Ref, type RefObject } from "react";
 import { now, syncClock } from "@/lib/clock";
+import { EVENT_TIME } from "@/lib/event";
 import FlipDigit, { type FlipDigitHandle } from "./FlipDigit";
 import s from "./Countdown.module.css";
-
-/** 12 December 2026, 00:00 in Lagos (WAT, UTC+1, no daylight saving). */
-export const EVENT_TIME = Date.UTC(2026, 11, 11, 23, 0, 0);
 
 export type CountdownHandle = { start: (cascade: boolean) => void };
 

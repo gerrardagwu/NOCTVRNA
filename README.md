@@ -86,7 +86,10 @@ after that (ticket drops, lineup news, reminders) is sent from Brevo, with no ch
    - **Unsubscribed** (blocklisted, or unsubscribed from this list): changes nothing. Brevo's suppression stands, and
      the visitor is told to email the sender address if they want updates again.
 3. The confirmation (`src/lib/waitlistEmail.ts`, images in `public/email/`) comes from `BREVO_SENDER_EMAIL`, with
-   replies going to the same address. If it fails to send, the person is still on the list.
+   replies going to the same address. If it fails to send, the person is still on the list. It opens with the hero's
+   logo and owl, then the same green ticket as the site's success dialog (their name, date, city, a CONFIRMED stamp),
+   what to expect next, the days left to 12.12.26 in the countdown's flip tiles, and a save-the-date link (Google
+   Calendar, or `/the-lagos-life.ics` for Apple and Outlook).
 
 The API key is read only on the server (`server-only`); it never reaches the browser.
 
@@ -119,7 +122,10 @@ night), Brevo Automations can start when a contact is added to the list.
 
 ## Assets
 
-`public/email/` holds the confirmation email's logo and owl (PNG and JPG, since email apps don't show WebP or SVG).
+`public/email/` holds the confirmation email's images (PNG and JPG, since email apps don't show WebP or SVG). They're
+made from the site itself by `node scripts/email-assets.mjs` with `npm run dev` running: the poster, the ticket's
+badge, stamp, stub and grain, and the flip tiles `digit-0.png` to `digit-9.png`. `logo.png` and `owl.jpg` are from the
+first version of the email; emails already sent still link to them, so keep them.
 
 Everything in `public/images` except the photos was exported from the Figma file: hero background, logo, owl badge,
 strip owl, poster, and the six flip-card shapes (`flip-1.svg` to `flip-6.svg`).
