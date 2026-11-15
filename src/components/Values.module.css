@@ -1,10 +1,16 @@
 /*
-  Our philosophy, one value per screen. Each one is a full-bleed photo (a value without one falls back
-  to a flood of brand colour) with big hopping letters, a spinning owl sticker and a tilted tag.
+  Our philosophy. Desktop: one value per screen, stacked, so scrolling carries each one fully out as the next
+  comes in. Each is a full-bleed photo (a value without one falls back to a flood of brand colour) with big
+  hopping letters, a spinning owl sticker and a tag. Mobile: the same three as a row of cards you swipe
+  through, the next one peeking in at the edge.
 */
+.values {
+  position: relative;
+}
+
 .layers {
-  position: absolute;
-  inset: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .layer {
@@ -16,11 +22,22 @@
   --sticker-bg: var(--fg);
   --sticker-ink: var(--bg);
   --ring: var(--green);
-  position: absolute;
-  inset: 0;
+  position: relative;
+  height: 100svh;
+  min-height: 560px;
   overflow: hidden;
   background: var(--bg);
   color: var(--text);
+}
+
+/* Everything in a value; the last one dims as the sign-up slides over it. */
+.layerIn {
+  position: absolute;
+  inset: 0;
+}
+
+.progress {
+  display: none;
 }
 
 /* Originality: the green bridge at night. */
@@ -240,38 +257,166 @@
   height: 100%;
 }
 
+/* ---------- Mobile: a swipeable row of cards ---------- */
 @media (max-width: 760px) {
+  .values {
+    padding: 64px 0 48px;
+  }
+
+  .layers {
+    flex-direction: row;
+    gap: 12px;
+    padding: 0 16px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 16px;
+    scrollbar-width: none;
+  }
+
+  .layers::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Narrower than the screen, so the next card always shows at the edge. */
+  .layer {
+    flex: 0 0 min(calc(100vw - 64px), 400px);
+    height: auto;
+    min-height: 0;
+    border-radius: 12px;
+    scroll-snap-align: start;
+    isolation: isolate;
+  }
+
+  .layerIn {
+    position: relative;
+    inset: auto;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    /* The photo shows clear across the top; the words sit below it. */
+    padding-top: min(46vw, 210px);
+  }
+
+  /* The photo fills the top of the card, so its subject is what you see, and melts into the card below. */
+  .photo,
+  .scrim {
+    inset: 0 0 auto;
+    height: calc(min(46vw, 210px) + 150px);
+  }
+
+  .scrim {
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      transparent 38%,
+      color-mix(in srgb, var(--bg) 70%, transparent) 72%,
+      var(--bg) 100%
+    );
+  }
+
+  .grid {
+    position: static;
+    inset: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 14px;
+    padding: 0 20px 24px;
+  }
+
+  .top {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+  }
+
+  .count {
+    padding: 6px 12px;
+    font-size: 12px;
+    background: color-mix(in srgb, var(--bg) 55%, transparent);
+  }
+
   .title {
-    font-size: clamp(52px, 16vw, 96px);
+    align-self: stretch;
     max-width: none;
+    font-size: 44px;
+    line-height: 0.9;
   }
 
   .sticker {
-    width: 96px;
-    right: 16px;
-    top: calc(var(--header-h) + 64px);
+    width: 72px;
+    right: 14px;
+    top: 14px;
   }
 
   .bottom {
     flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
+    gap: 14px;
   }
 
   .body {
-    font-size: 15px;
+    font-size: 14.5px;
     line-height: 1.45;
   }
 
   .tag {
-    font-size: 18px;
-    padding: 10px 18px;
+    font-size: 16px;
+    padding: 8px 14px;
+  }
+
+  /* Where you are in the row. */
+  .progress {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 20px;
+  }
+
+  .bar {
+    position: relative;
+    width: 36px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .bar span,
+  .bar::before {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 3px;
+    margin-top: -1.5px;
+    border-radius: 2px;
+  }
+
+  .bar::before {
+    content: "";
+    background: rgb(195 139 239 / 0.22);
+  }
+
+  .bar span {
+    background: var(--brand);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform 0.5s var(--ease-out);
+  }
+
+  .bar[data-active] span {
+    transform: scaleX(1);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .ch,
-  .tag {
+  .tag,
+  .bar span {
     transition: none;
     animation: none !important;
   }

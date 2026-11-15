@@ -14,6 +14,8 @@
   --neon: #10f707;
   --mute: #5d5d5d;
   --mute-2: #77736d;
+  /* Form errors: a warm red that reads on the near-black. */
+  --danger: #ff5c5c;
 
   --header-h: 76px;
   --strip-h: 86px;

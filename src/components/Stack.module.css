@@ -1,4 +1,4 @@
-/* Two pinned full-screen stages (Experience; values and sign-up) with the city as a normal section between. */
+/* The pinned Experience stage, then the city, the values and the sign-up in the normal scroll. */
 .stage {
   position: relative;
   height: 100svh;
@@ -10,7 +10,9 @@
   background: var(--night);
 }
 
+/* Values and sign-up. Above the city, which holds while this slides up over it. */
 .valStage {
+  position: relative;
   z-index: 3;
   background: var(--void);
   box-shadow: 0 -40px 80px rgb(0 0 0 / 0.55);
@@ -154,14 +156,19 @@
   object-fit: cover;
 }
 
-/* ---------- Values: photo scenes, see Values.module.css ---------- */
+/* ---------- Values: see Values.module.css ---------- */
 .values {
-  background: var(--deep);
+  position: relative;
+  background: var(--void);
 }
 
 /* ---------- Enter a different state of night (Figma "Frame 9") ---------- */
 .enter {
+  position: relative;
   z-index: 1;
+  height: 100svh;
+  min-height: 600px;
+  overflow: hidden;
   background: var(--void);
   box-shadow: 0 -40px 80px rgb(0 0 0 / 0.55);
 }
@@ -253,13 +260,23 @@
   gap: 40px;
 }
 
+/* Room under the fields for an error, so the layout doesn't jump when one appears. */
+.formWrap {
+  padding-bottom: 40px;
+}
+
 .field {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 4px;
   font-size: 18px;
   letter-spacing: -0.04em;
   color: var(--mute);
+}
+
+.field label {
+  transition: color 0.3s var(--ease-out);
 }
 
 .field input {
@@ -284,6 +301,40 @@
   border-bottom-color: var(--green);
 }
 
+/* Error: the label and line turn red, the line thickens, and the reason sits underneath. */
+.field[data-invalid] label {
+  color: var(--danger);
+}
+
+.field[data-invalid] input,
+.field[data-invalid] input:focus {
+  border-bottom-color: var(--danger);
+  box-shadow: 0 1px 0 var(--danger);
+}
+
+.error {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 8px);
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 14px;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--danger);
+}
+
+.error:empty {
+  display: none;
+}
+
+.error svg {
+  flex: none;
+  margin-top: 1px;
+}
+
 .button {
   padding: 18px 20px;
   border: 0;
@@ -302,12 +353,318 @@
   box-shadow: 0 10px 30px rgb(85 255 0 / 0.3);
 }
 
-.formMsg {
-  min-height: 1.4em;
-  margin-top: -16px;
+/* ---------- The ticket you get for signing up ---------- */
+.dialog {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 72px 16px 32px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.dialog[open] {
+  display: grid;
+  place-items: center;
+}
+
+.dialog::backdrop {
+  background: transparent;
+}
+
+/* Purposeful blur: the page sinks back so the ticket is the only thing in focus. */
+.dialogScrim {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(60% 50% at 50% 50%, rgb(85 255 0 / 0.12), transparent 70%),
+    rgb(5 4 6 / 0.82);
+  backdrop-filter: blur(10px);
+}
+
+.dialogBody {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  width: 100%;
+}
+
+.pass {
+  --bite: 14px;
+  --ink-t: #0a0a06;
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.32 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  display: flex;
+  width: min(100%, 700px);
+  color: var(--ink-t);
+  filter: drop-shadow(0 30px 60px rgb(85 255 0 / 0.22)) drop-shadow(0 10px 24px rgb(0 0 0 / 0.5));
+}
+
+.passMain,
+.passStub {
+  position: relative;
+  background: var(--grain), var(--green);
+  mask-repeat: no-repeat;
+  mask-size: 50.5% 50.5%;
+  mask-position: left top, right top, left bottom, right bottom;
+}
+
+/* Notches bite into the corners either side of the perforation. */
+.passMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 28px 36px 30px;
+  border-radius: 16px 0 0 16px;
+  mask-image:
+    linear-gradient(#000, #000),
+    radial-gradient(circle at 100% 0, transparent var(--bite), #000 calc(var(--bite) + 0.5px)),
+    linear-gradient(#000, #000),
+    radial-gradient(circle at 100% 100%, transparent var(--bite), #000 calc(var(--bite) + 0.5px));
+}
+
+.passStub {
+  flex: 0 0 132px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 26px 0 22px;
+  border-radius: 0 16px 16px 0;
+  background-image: var(--grain), repeating-linear-gradient(180deg, rgb(10 10 6 / 0.55) 0 6px, transparent 6px 12px);
+  background-size: auto, 2px 100%;
+  background-position: 0 0, left center;
+  background-repeat: repeat, no-repeat;
+  background-color: var(--green);
+  mask-image:
+    radial-gradient(circle at 0 0, transparent var(--bite), #000 calc(var(--bite) + 0.5px)),
+    linear-gradient(#000, #000),
+    radial-gradient(circle at 0 100%, transparent var(--bite), #000 calc(var(--bite) + 0.5px)),
+    linear-gradient(#000, #000);
+}
+
+.passHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.passOwl {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 0 0 2px var(--ink-t);
+}
+
+.passOwl img {
+  width: 100%;
+  height: 100%;
+}
+
+.passBrand {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-anton), sans-serif;
+  font-size: 18px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+}
+
+.passBrand small {
+  margin-top: 4px;
+  font-family: var(--font-bunch), sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.passTitle {
+  margin-top: 10px;
+  font-family: var(--font-anton), sans-serif;
+  font-weight: 400;
+  font-size: clamp(44px, 6.4vw, 68px);
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.passName {
+  color: var(--deep);
+}
+
+.passMsg {
+  max-width: 30ch;
+  font-size: 20px;
+  line-height: 1.3;
+  letter-spacing: -0.03em;
+  font-weight: 600;
+}
+
+.passFacts {
+  display: flex;
+  gap: 28px;
+  margin: 6px 0 0;
+  padding-top: 14px;
+  border-top: 1.5px dashed rgb(10 10 6 / 0.35);
+}
+
+.passFacts div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.passFacts dt {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.passFacts dd {
+  margin: 0;
+  font-family: var(--font-anton), sans-serif;
+  font-size: 20px;
+  letter-spacing: 0.02em;
+}
+
+/* A rubber stamp in the brand's deep purple, inked unevenly. */
+.stamp {
+  position: absolute;
+  right: 26px;
+  bottom: 24px;
+  display: grid;
+  place-items: center;
+}
+
+.stampIn {
+  --worn: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='w'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -3 2.3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23w)'/%3E%3C/svg%3E");
+  display: block;
+  padding: 8px 14px 7px;
+  border: 3px solid var(--deep);
+  border-radius: 8px;
+  outline: 1.5px solid var(--deep);
+  outline-offset: 3px;
+  font-family: var(--font-anton), sans-serif;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--deep);
+  rotate: -12deg;
+  mask-image: var(--worn);
+  mix-blend-mode: multiply;
+}
+
+.burst {
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  border: 2px solid var(--deep);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.passAdmit {
+  writing-mode: vertical-rl;
+  rotate: 180deg;
+  font-family: var(--font-anton), sans-serif;
+  font-size: 26px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.passCode {
+  width: 44px;
+  height: 64px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--ink-t) 0 2px,
+    transparent 2px 4px,
+    var(--ink-t) 4px 5px,
+    transparent 5px 8px,
+    var(--ink-t) 8px 11px,
+    transparent 11px 12px,
+    var(--ink-t) 12px 13px,
+    transparent 13px 15px
+  );
+  opacity: 0.85;
+}
+
+.passDate {
+  font-family: var(--font-anton), sans-serif;
   font-size: 15px;
+  letter-spacing: 0.08em;
+}
+
+.passDone {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 24px;
+  border: 1px solid rgb(237 193 252 / 0.35);
+  border-radius: 999px;
+  background: transparent;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 0.3s var(--ease-out), background-color 0.3s var(--ease-out), color 0.3s var(--ease-out);
+}
+
+.passDone svg {
+  transition: transform 0.4s var(--ease-out);
+}
+
+.passDone:hover {
+  border-color: var(--green);
+  background: rgb(85 255 0 / 0.08);
   color: var(--green);
-  text-align: center;
+}
+
+.passDone:hover svg {
+  transform: translateX(4px);
+}
+
+.passClose {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgb(237 193 252 / 0.3);
+  border-radius: 50%;
+  background: rgb(5 4 6 / 0.5);
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 0.3s var(--ease-out), transform 0.4s var(--ease-out);
+}
+
+.passClose:hover {
+  border-color: var(--brand);
+  transform: rotate(90deg);
 }
 
 @media (max-width: 760px) {
@@ -333,6 +690,8 @@
   .enterInner {
     --u: min(calc(100vw / 860), calc(100svh / 1100));
     gap: 28px;
+    /* Clear the countdown tab that hangs under the header. */
+    padding-top: calc(var(--header-h) + 40px);
   }
 
   .enterRest {
@@ -353,7 +712,76 @@
     width: 100%;
   }
 
-  .formMsg {
-    margin-top: -8px;
+  /* Stacked fields: the reason sits in the flow under its field. */
+  .formWrap {
+    width: 100%;
+    max-width: 360px;
+    padding-bottom: 0;
+  }
+
+  .error {
+    position: static;
+    margin-top: 4px;
+  }
+
+  /* The ticket stands upright; the stub tears off along the bottom. */
+  .pass {
+    --bite: 12px;
+    flex-direction: column;
+    width: min(100%, 380px);
+  }
+
+  .passMain {
+    padding: 24px 22px 26px;
+    border-radius: 16px 16px 0 0;
+    mask-image:
+      linear-gradient(#000, #000),
+      linear-gradient(#000, #000),
+      radial-gradient(circle at 0 100%, transparent var(--bite), #000 calc(var(--bite) + 0.5px)),
+      radial-gradient(circle at 100% 100%, transparent var(--bite), #000 calc(var(--bite) + 0.5px));
+  }
+
+  .passStub {
+    flex: none;
+    flex-direction: row;
+    padding: 18px 22px;
+    border-radius: 0 0 16px 16px;
+    background-image: var(--grain), repeating-linear-gradient(90deg, rgb(10 10 6 / 0.55) 0 6px, transparent 6px 12px);
+    background-size: auto, 100% 2px;
+    background-position: 0 0, center top;
+    mask-image:
+      radial-gradient(circle at 0 0, transparent var(--bite), #000 calc(var(--bite) + 0.5px)),
+      radial-gradient(circle at 100% 0, transparent var(--bite), #000 calc(var(--bite) + 0.5px)),
+      linear-gradient(#000, #000),
+      linear-gradient(#000, #000);
+  }
+
+  .passAdmit {
+    writing-mode: horizontal-tb;
+    rotate: none;
+    font-size: 20px;
+  }
+
+  .passCode {
+    width: 96px;
+    height: 30px;
+  }
+
+  .passTitle {
+    font-size: 44px;
+  }
+
+  .passMsg {
+    font-size: 17px;
+  }
+
+  .stamp {
+    right: 16px;
+    bottom: 22px;
+  }
+
+  .stampIn {
+    font-size: 19px;
+    padding: 7px 11px 6px;
   }
 }

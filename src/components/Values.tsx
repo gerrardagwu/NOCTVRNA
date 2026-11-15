@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/gsap";
 import Blink, { OWL_EYES } from "./Blink";
 import s from "./Values.module.css";
@@ -31,21 +31,41 @@ export const VALUES: { title: string; tag: string; body: string; photo?: Photo }
 
 const RING_TEXT = "NOCTVRNA • THE LAGOS LIFE • 12.12.26 • ";
 
+/** One value's entrance: letters spring up, the sticker spins in, the tag slaps on, the copy follows. */
+export function revealValue(layer: Element) {
+  return gsap
+    .timeline()
+    .from(layer.querySelectorAll("[data-vchar]"), { yPercent: 110, rotate: 12, opacity: 0, stagger: 0.02, duration: 0.55, ease: "expo.out" })
+    .from(layer.querySelector("[data-vsticker]"), { scale: 0.3, rotate: -140, opacity: 0, duration: 0.7, ease: "expo.out" }, 0.05)
+    .from(layer.querySelector("[data-vtag]"), { scale: 0, duration: 0.5, ease: "expo.out" }, 0.3)
+    .from(layer.querySelector("[data-vbody]"), { y: 30, opacity: 0, duration: 0.5, ease: "power2.out" }, 0.35);
+}
+
+/** The value's photo settling from a slow push-in. */
+export function settleValue(layer: Element) {
+  const photo = layer.querySelector("[data-vphoto]");
+  return photo ? gsap.fromTo(photo, { scale: 1.18 }, { scale: 1, duration: 1.6, ease: "power2.out" }) : gsap.timeline();
+}
+
 /**
- * Our philosophy, one value per screen. Each value floods the stage in its own colour; the Stack
- * timeline wipes the next one in from the sticker. This component owns the hover play: letters hop
- * under the cursor, the sticker spins faster and leans toward you, the tag wiggles.
+ * Our philosophy. On desktop each value is a full screen of its own and they scroll past one after another
+ * (the scroll-linked entrances live in Stack). On mobile they become a row of cards you swipe through, the
+ * next one peeking in from the side. This component owns the hover play (letters hop under the cursor, the
+ * sticker spins faster and leans toward you), the card entrances on mobile and the swipe progress.
  */
 export default function Values() {
   const root = useRef<HTMLDivElement>(null);
+  const track = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(0);
 
   useGSAP(
     () => {
-      if (prefersReducedMotion()) return;
       const q = gsap.utils.selector(root);
+      const layers = q("[data-vlayer]") as HTMLElement[];
+      if (prefersReducedMotion()) return;
       const cleanups: (() => void)[] = [];
 
-      (q("[data-vlayer]") as HTMLElement[]).forEach((layer) => {
+      layers.forEach((layer) => {
         const sticker = layer.querySelector<HTMLElement>("[data-sticker]")!;
         const pan = layer.querySelector<HTMLElement>("[data-vpan]");
         const px = pan && gsap.quickTo(pan, "x", { duration: 1.2, ease: "power3.out" });
@@ -86,81 +106,151 @@ export default function Values() {
         });
       });
 
-      return () => cleanups.forEach((fn) => fn());
+      // Mobile: each card plays its entrance the first time most of it is on screen, whether that's from
+      // scrolling down to the row or swiping to the card. (The viewport observer sees the row's clipping.)
+      const mm = gsap.matchMedia();
+      mm.add("(max-width: 760px)", () => {
+        const entrances = layers.map((layer) => gsap.timeline({ paused: true }).add(settleValue(layer), 0).add(revealValue(layer), 0.1));
+        const io = new IntersectionObserver(
+          (entries) =>
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entrances[layers.indexOf(entry.target as HTMLElement)]?.play();
+              io.unobserve(entry.target);
+            }),
+          { threshold: 0.6 },
+        );
+        layers.forEach((layer) => io.observe(layer));
+        return () => io.disconnect();
+      });
+
+      return () => {
+        cleanups.forEach((fn) => fn());
+        mm.revert();
+      };
     },
     { scope: root },
   );
 
-  return (
-    <div ref={root} className={s.layers} data-vlayers>
-      {VALUES.map((v, i) => (
-        <article
-          key={v.title}
-          className={`${s.layer} ${s[`v${i + 1}`]} ${v.photo ? s.hasPhoto : ""}`}
-          data-vlayer
-          aria-labelledby={`value-${i}`}
-        >
-          {v.photo && (
-            <>
-              <div className={s.photo} data-vpan>
-                <div className={s.photoZoom} data-vphoto>
-                  <Image src={v.photo.src} alt={v.photo.alt} fill sizes="100vw" quality={85} style={{ objectPosition: v.photo.focus }} />
-                </div>
-              </div>
-              <div className={s.scrim} aria-hidden="true" />
-            </>
-          )}
-          <div className={s.grid}>
-            <div className={s.top}>
-              <span className={s.count} aria-label={`Value ${i + 1} of ${VALUES.length}`}>
-                {String(i + 1).padStart(2, "0")}
-                <span aria-hidden="true"> / 03</span>
-              </span>
-            </div>
+  // Which card the row has settled on, for the progress bars.
+  const onTrackScroll = () => {
+    const row = track.current;
+    if (!row) return;
+    const cards = [...row.children] as HTMLElement[];
+    const pad = parseFloat(getComputedStyle(row).scrollPaddingLeft) || 0;
+    let nearest = 0;
+    cards.forEach((card, i) => {
+      if (Math.abs(card.offsetLeft - pad - row.scrollLeft) < Math.abs(cards[nearest].offsetLeft - pad - row.scrollLeft)) nearest = i;
+    });
+    setActive(nearest);
+  };
 
-            <h3 id={`value-${i}`} className={s.title} data-vtitle>
-              <span className="sr-only">{v.title}</span>
-              {v.title.split(" ").map((word, wi) => (
-                <span key={wi} className={s.wordWrap} aria-hidden="true">
-                  {[...word].map((ch, ci) => (
-                    <span key={ci} className={s.chWrap} data-vchar>
-                      <span className={s.ch}>{ch}</span>
+  const goTo = (i: number) => {
+    const row = track.current;
+    const card = row?.children[i] as HTMLElement | undefined;
+    if (!row || !card) return;
+    const pad = parseFloat(getComputedStyle(row).scrollPaddingLeft) || 0;
+    row.scrollTo({ left: card.offsetLeft - pad, behavior: prefersReducedMotion() ? "auto" : "smooth" });
+  };
+
+  return (
+    <div ref={root} className={s.values}>
+      <div ref={track} className={s.layers} data-vlayers onScroll={onTrackScroll}>
+        {VALUES.map((v, i) => (
+          <article
+            key={v.title}
+            className={`${s.layer} ${s[`v${i + 1}`]} ${v.photo ? s.hasPhoto : ""}`}
+            data-vlayer
+            aria-labelledby={`value-${i}`}
+          >
+            <div className={s.layerIn} data-vinner>
+              {v.photo && (
+                <>
+                  <div className={s.photo} data-vpan>
+                    <div className={s.photoZoom} data-vphoto>
+                      <Image
+                        src={v.photo.src}
+                        alt={v.photo.alt}
+                        fill
+                        sizes="(max-width: 760px) 90vw, 100vw"
+                        quality={85}
+                        style={{ objectPosition: v.photo.focus }}
+                      />
+                    </div>
+                  </div>
+                  <div className={s.scrim} aria-hidden="true" />
+                </>
+              )}
+              <div className={s.grid}>
+                <div className={s.top}>
+                  <span className={s.count} aria-label={`Value ${i + 1} of ${VALUES.length}`}>
+                    {String(i + 1).padStart(2, "0")}
+                    <span aria-hidden="true"> / 03</span>
+                  </span>
+                </div>
+
+                <h3 id={`value-${i}`} className={s.title} data-vtitle>
+                  <span className="sr-only">{v.title}</span>
+                  {v.title.split(" ").map((word, wi) => (
+                    <span key={wi} className={s.wordWrap} aria-hidden="true">
+                      {[...word].map((ch, ci) => (
+                        <span key={ci} className={s.chWrap} data-vchar>
+                          <span className={s.ch}>{ch}</span>
+                        </span>
+                      ))}
                     </span>
                   ))}
-                </span>
-              ))}
-            </h3>
+                </h3>
 
-            <div className={s.bottom}>
-              <span className={s.tagWrap} data-vtag>
-                <span className={s.tag}>{v.tag}</span>
-              </span>
-              <p className={s.body} data-vbody>
-                {v.body}
-              </p>
-            </div>
-          </div>
+                <div className={s.bottom}>
+                  <span className={s.tagWrap} data-vtag>
+                    <span className={s.tag}>{v.tag}</span>
+                  </span>
+                  <p className={s.body} data-vbody>
+                    {v.body}
+                  </p>
+                </div>
+              </div>
 
-          <div className={s.sticker} data-sticker aria-hidden="true">
-            <div className={s.stickerIn} data-vsticker>
-              <svg className={s.ring} data-ring viewBox="0 0 200 200">
-                <defs>
-                  <path id={`ring-${i}`} d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0" />
-                </defs>
-                <text>
-                  <textPath href={`#ring-${i}`} textLength="489">
-                    {RING_TEXT}
-                  </textPath>
-                </text>
-              </svg>
-              <span className={s.owl}>
-                <Image src="/images/owl-badge.png" alt="" width={88} height={88} />
-                <Blink eyes={OWL_EYES.badge} />
-              </span>
+              <div className={s.sticker} data-sticker aria-hidden="true">
+                <div className={s.stickerIn} data-vsticker>
+                  <svg className={s.ring} data-ring viewBox="0 0 200 200">
+                    <defs>
+                      <path id={`ring-${i}`} d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0" />
+                    </defs>
+                    <text>
+                      <textPath href={`#ring-${i}`} textLength="489">
+                        {RING_TEXT}
+                      </textPath>
+                    </text>
+                  </svg>
+                  <span className={s.owl}>
+                    <Image src="/images/owl-badge.png" alt="" width={88} height={88} />
+                    <Blink eyes={OWL_EYES.badge} />
+                  </span>
+                </div>
+              </div>
             </div>
-          </div>
-        </article>
-      ))}
+          </article>
+        ))}
+      </div>
+
+      {/* Mobile only: where you are in the row; tap a bar to jump to that card. */}
+      <div className={s.progress} role="group" aria-label="Values">
+        {VALUES.map((v, i) => (
+          <button
+            key={v.title}
+            type="button"
+            className={s.bar}
+            data-active={i === active || undefined}
+            aria-label={`Show ${v.title.replace(/\.$/, "")}`}
+            aria-current={i === active || undefined}
+            onClick={() => goTo(i)}
+          >
+            <span />
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
