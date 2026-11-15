@@ -27,7 +27,7 @@
   cursor: pointer;
   pointer-events: auto;
   /* Translucent, with a blur so content scrolling underneath reads as colour and light, not text. */
-  background: rgb(9 9 9 / 0.7);
+  background: rgb(5 4 6 / 0.72);
   backdrop-filter: blur(14px) saturate(1.2); /* the build adds the -webkit- copy for Safari */
   border-bottom: 0.5px solid var(--deep);
   opacity: 0;
@@ -39,7 +39,7 @@
   position: absolute;
   top: var(--header-h);
   right: 32px;
-  background: rgb(9 9 9 / 0.7);
+  background: rgb(5 4 6 / 0.72);
   backdrop-filter: blur(14px) saturate(1.2);
   border: 0.5px solid var(--deep);
   border-top: 0;

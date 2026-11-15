@@ -225,7 +225,7 @@ export default function Hero({ play }: { play: boolean }) {
           </div>
 
           <div className={s.cdTitle} data-cd-title data-fade>
-            <p data-intro>{"Countdown to  12 - 12 - 26"}</p>
+            <p data-intro>Countdown to 12.12.26</p>
           </div>
 
           <div className={s.cdWrap} data-cd-wrap>

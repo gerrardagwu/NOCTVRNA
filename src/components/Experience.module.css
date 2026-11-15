@@ -125,7 +125,7 @@
   height: min(68svh, 640px);
   border-radius: var(--r);
   overflow: hidden;
-  background: #08070e;
+  background: #040307;
 }
 
 /* Photos bleed a little past the card so the cursor parallax never shows an edge. */

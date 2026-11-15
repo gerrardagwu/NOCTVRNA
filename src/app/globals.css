@@ -1,9 +1,10 @@
 /* Tokens taken from the Figma file (styles: brand, second, white) plus the section fills it uses. */
 :root {
   --black: #000000;
-  --loader: #050505;
-  --void: #090909;
-  --night: #0e0b12;
+  /* Backgrounds: near-black with a trace of the brand purple. */
+  --loader: #030203;
+  --void: #050406;
+  --night: #07050a;
   --ink: #f5f1e5;
   --ink-soft: #e9e6df;
   --brand: #c38bef;
