@@ -6,7 +6,7 @@ import { EVENT_TIME } from "@/lib/event";
  * date, since set times aren't announced yet. Static: built once from EVENT_TIME, like the countdown.
  */
 
-const SITE_URL = process.env.SITE_URL?.trim() || "https://thisisnoctvrna.com";
+const SITE_URL = process.env.SITE_URL?.trim() || "https://www.thisisnoctvrna.com"; // www: the bare domain redirects there
 const LAGOS_OFFSET_MS = 60 * 60 * 1000; // WAT, UTC+1
 
 /** YYYYMMDD of the Lagos calendar date, `addDays` after the event's. */

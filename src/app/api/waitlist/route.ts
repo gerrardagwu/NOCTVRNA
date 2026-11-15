@@ -17,7 +17,7 @@ import {
  * Runs on the server only; the Brevo API key never reaches the browser.
  */
 
-const SITE_URL = process.env.SITE_URL?.trim() || "https://thisisnoctvrna.com";
+const SITE_URL = process.env.SITE_URL?.trim() || "https://www.thisisnoctvrna.com"; // www: the bare domain redirects there
 const MAX_BODY = 2048;
 const MIN_FILL_MS = 2500; // a person can't scroll to the form and fill it in faster than this
 

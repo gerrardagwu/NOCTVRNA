@@ -109,7 +109,7 @@ NOCTVRNA. Unsubscribe anytime." (`CONSENT_TEXT` in `src/lib/waitlist.ts`). Only 
 | `BREVO_LIST_ID` | The numeric ID of the waitlist list (Contacts → Lists) |
 | `BREVO_SENDER_EMAIL` | A sender on `thisisnoctvrna.com` that Brevo has verified, with the domain authenticated (DKIM, SPF, DMARC) |
 | `BREVO_SENDER_NAME` | Who the email is from, e.g. NOCTVRNA |
-| `SITE_URL` | Optional. The site address used in the email. Defaults to `https://thisisnoctvrna.com` |
+| `SITE_URL` | Optional. The site address used in the email. Defaults to `https://www.thisisnoctvrna.com` |
 
 After changing a variable in Vercel, redeploy so the site picks it up. If any variable is missing, the form shows
 "Sign-ups are paused for a moment" and the Vercel function log names what's missing.
