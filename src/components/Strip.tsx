@@ -4,8 +4,8 @@ import Image from "next/image";
 import { useRef } from "react";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/gsap";
 import s from "./Strip.module.css";
+import { STRIP_WORDS } from "./stripWords";
 
-const WORDS = ["CULTURE", "SOUND", "PEOPLE", "ATMOSPHERE"];
 const REPEATS = 3; // one set is wider than any screen, so two sets loop seamlessly
 
 /**
@@ -53,9 +53,11 @@ export default function Strip() {
   const set = (key: string, hidden: boolean) => (
     <div className={s.set} key={key} aria-hidden={hidden || undefined}>
       {Array.from({ length: REPEATS }).flatMap((_, r) =>
-        WORDS.map((word) => (
+        STRIP_WORDS.map(({ word, w, d }) => (
           <span className={s.item} key={`${r}-${word}`}>
-            <span className={s.word}>{word}</span>
+            <svg className={s.word} width={w} height={22} viewBox={`0 0 ${w} 22`} aria-hidden="true">
+              <path d={d} fill="currentColor" />
+            </svg>
             <Image className={s.owl} src="/images/strip-owl.png" alt="" width={40} height={40} />
           </span>
         )),

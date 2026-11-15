@@ -26,14 +26,16 @@
   padding-right: 60px;
 }
 
+/* Bunch Bold outlines (see stripWords.ts). Caps are 22px tall at the design's 32px and sit 5px below the
+   owls' centre line, as in the Figma strip. */
 .word {
-  font-family: var(--font-bunch), sans-serif;
-  font-weight: 800;
-  font-size: 32px;
-  line-height: 32px;
-  letter-spacing: -0.04em;
+  display: block;
+  flex-shrink: 0;
+  height: 22px;
+  width: auto;
+  margin-left: 1px; /* the font's side bearing, cropped off by the export */
+  translate: 0 5px;
   color: var(--deep);
-  white-space: nowrap;
 }
 
 .owl {
@@ -49,8 +51,8 @@
   }
 
   .word {
-    font-size: 24px;
-    line-height: 24px;
+    height: 16.5px; /* the 24px size */
+    translate: 0 4px;
   }
 
   .owl {
