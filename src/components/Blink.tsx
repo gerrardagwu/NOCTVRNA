@@ -18,9 +18,10 @@ export const OWL_EYES = {
     { x: 19.5, y: 41.0, w: 28, h: 39.2 },
     { x: 81.5, y: 41.9, w: 28.5, h: 39.2 },
   ],
+  // The event flyer in the city section.
   poster: [
-    { x: 19.5, y: 51.8, w: 28, h: 18 },
-    { x: 81.5, y: 52.2, w: 28.5, h: 18 },
+    { x: 19.6, y: 51.3, w: 28.6, h: 18.8 },
+    { x: 81.8, y: 51.6, w: 28.6, h: 18.6 },
   ],
 } satisfies Record<string, Eye[]>;
 

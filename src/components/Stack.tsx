@@ -221,8 +221,8 @@ export default function Stack() {
                   <dd>12.12.26</dd>
                 </div>
                 <div>
-                  <dt>City</dt>
-                  <dd>Lagos</dd>
+                  <dt>Location</dt>
+                  <dd>Loud Lagos</dd>
                 </div>
                 <div>
                   <dt>Doors</dt>
@@ -235,8 +235,8 @@ export default function Stack() {
               <div className={s.poster} data-poster>
                 <div className={s.posterArt}>
                   <Image
-                    src="/images/poster.jpg"
-                    alt="NOCTVRNA: The Lagos Life poster. An owl whose green eyes reflect the Lekki-Ikoyi bridge at night."
+                    src="/images/flyer.jpg"
+                    alt="NOCTVRNA: The Lagos Life flyer. An owl whose green eyes reflect the Lekki-Ikoyi bridge at night. Date: Dec 12th. Venue: Loud Lagos. For table reservations: 0816 866 9798."
                     fill
                     sizes="(max-width: 760px) 80vw, 600px"
                     quality={85}

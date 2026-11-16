@@ -294,9 +294,10 @@
   --cu: var(--cdu);
 }
 
+/* As tall as the screen at its largest (see --hero-full in globals.css), so the strip below never peeks in. */
 .hero {
   position: relative;
-  height: var(--hero-h);
+  height: var(--hero-full);
   overflow: hidden;
   background: var(--black);
 }
@@ -323,7 +324,9 @@
   background: linear-gradient(to bottom, rgb(0 0 0 / 0.8) 65.51%, rgb(0 0 0 / 0));
 }
 
-@media (max-width: 760px) {
+/* A phone held upright. (Turned on its side it gets the desktop composition, which suits a short, wide
+   screen; the stack below is taller than such a screen and pushed the logo off the top.) */
+@media (max-width: 760px) and (orientation: portrait) {
   /*
     Same order, stacked and centred as one block. --t is the block's top: its height is 90.4vw + 110px
     (logo, owl overlapping it by 13vw, taglines, label, countdown).
@@ -379,7 +382,9 @@
   .cdWrap > * {
     --cu: var(--cdu);
   }
+}
 
+@media (max-width: 760px) {
   .cdTab {
     right: 16px;
   }

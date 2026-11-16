@@ -121,7 +121,8 @@
   z-index: 1;
   justify-self: end;
   width: min(100%, 460px);
-  aspect-ratio: 458 / 537;
+  /* The flyer's own 4:5, so the whole flyer shows (its date, venue and reservations line run to the bottom). */
+  aspect-ratio: 1600 / 2000;
 }
 
 /* A soft purple light behind the poster, as if it's lit from the back. */
@@ -142,14 +143,10 @@
   overflow: hidden;
 }
 
-/* The artwork at its own 1024 x 1280 ratio, cropped like object-fit: cover, so the eyelids line up. */
+/* The artwork in a box of its own 1600 x 2000 ratio (the eyelids are placed in percent of it). */
 .posterArt {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  aspect-ratio: 1024 / 1280;
-  transform: translateY(-50%);
+  inset: 0;
 }
 
 .posterArt img {

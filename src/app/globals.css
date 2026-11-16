@@ -18,9 +18,27 @@
 
   --header-h: 76px;
   --strip-h: 86px;
-  --hero-h: max(560px, 100svh);
+  /*
+    The hero, in two heights. Phone browsers show and hide their toolbars as you scroll, so "the screen" is
+    two sizes there:
+     --hero-h     the screen with the toolbars showing. The hero's artwork (logo, owl, countdown) is laid out
+                  in this, so none of it ever sits behind a toolbar.
+     --hero-full  the screen with the toolbars tucked away. The hero section itself is this tall, so the purple
+                  strip after it never peeks into the first screen, even when the toolbar stays hidden (after
+                  a back-to-top tap, say) or floats over the page.
+    Browsers without these units (older Android ones) use 100vh, which there means the larger of the two.
+  */
+  --hero-h: max(560px, 100vh);
+  --hero-full: max(560px, 100vh);
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@supports (height: 100lvh) {
+  :root {
+    --hero-h: max(560px, 100svh);
+    --hero-full: max(560px, 100lvh);
+  }
 }
 
 @media (max-width: 760px) {
