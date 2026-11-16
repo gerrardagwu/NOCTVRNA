@@ -19,8 +19,16 @@ export const metadata: Metadata = {
     "NOCTVRNA is a nightlife and culture experience built around music, creative expression and the energy of the night. The Lagos Life, 12.12.26.",
   openGraph: {
     title: "NOCTVRNA | The Lagos Life",
-    description: "Our day begins after dark. 12.12.26, Lagos.",
-    images: ["/images/poster.jpg"],
+    description: "Our day begins after dark. 12.12.26 at Loud Lagos.",
+    // The event flyer, as a lighter copy (link previews, WhatsApp's above all, can skip a heavy image).
+    images: [
+      {
+        url: "/images/flyer-share.jpg",
+        width: 1200,
+        height: 1500,
+        alt: "NOCTVRNA: The Lagos Life flyer. Dec 12th at Loud Lagos. For table reservations: 0816 866 9798.",
+      },
+    ],
   },
 };
 

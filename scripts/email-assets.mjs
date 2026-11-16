@@ -4,8 +4,7 @@
  * repaint an email's colours but leave images alone. So everything coloured is an image, and the live
  * text is white or grey, which survives the repaint (see src/lib/waitlistEmail.ts).
  *
- *   poster.jpg        the hero: the logo over the owl, faded into the email background
- *   lagos-life.png    THE LAGOS LIFE in the hero's green
+ *   flyer.jpg         the event flyer, its edges faded into the email background
  *   step-1..3.png     the green 01, 02, 03 of "What happens next"
  *   save-the-date.png the green button
  *   tagline.png       BEYOND THE ORDINARY. INTO THE NIGHT.
@@ -13,8 +12,8 @@
  *   badge.png, stamp.png, stub.png  pieces of the guest's ticket, drawn per guest by /api/ticket
  *
  * usage: start the site (npm run dev), then: node scripts/email-assets.mjs [http://localhost:3000]
- * Emails already sent link to earlier images in the same folder (logo.png, owl.jpg, grain.png), so
- * keep those files.
+ * Emails already sent link to earlier images in the same folder (logo.png, owl.jpg, grain.png, poster.jpg,
+ * lagos-life.png), so keep those files.
  */
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
@@ -30,37 +29,26 @@ const BG = "#050406";
 
 const browser = await chromium.launch();
 
-/* ---------- poster: the hero stage without the header, caption or countdown ---------- */
+/* ---------- flyer: the event flyer (public/images/flyer.jpg), its edges melted into the background ---------- */
 {
-  const page = await browser.newPage({ viewport: { width: 1440, height: 960 }, deviceScaleFactor: 1.25 });
-  await page.goto(base, { waitUntil: "networkidle" });
-  await page.waitForTimeout(5000); // the hero's intro animation
-  await page.addStyleTag({
-    content: `
-      [data-bar], [data-cd-tab], [data-ticket], [data-cd-title], [data-cd-wrap], [data-lagos], [data-after],
-      [class*="Blink"], nextjs-portal { display: none !important; }
-      html, body { background: ${BG} !important; }
-      #poster-fade { position: absolute; inset: 0; pointer-events: none;
-        background:
-          linear-gradient(to bottom, ${BG} 2%, transparent 9%, transparent 58%, ${BG} 76%),
-          linear-gradient(to right, ${BG} 8%, transparent 24%, transparent 76%, ${BG} 92%); }`,
-  });
-  // The fade goes over the owl and the city behind it, under the logo.
-  await page.evaluate(() => {
-    const d = document.createElement("div");
-    d.id = "poster-fade";
-    document.querySelector("[data-owl]").after(d);
-  });
-  await page.waitForTimeout(300);
-  // Logo top ≈ 60, owl fading out by ≈ 730 on the 1440×960 stage; the margins leave the logo's spikes room.
-  const shot = await page.screenshot({ clip: { x: 130, y: 20, width: 1180, height: 730 } });
+  const W = 1200; // shown 600 wide: sharp on 2x screens
+  const H = 1500;
+  // Fade the edges into the email's background (the city photo along the bottom is lighter than it), clear of
+  // the reservations line, which ends about 88% of the way down.
+  const fade = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">
+    <defs>
+      <linearGradient id="b" x1="0" y1="0" x2="0" y2="1"><stop offset="0.9" stop-color="${BG}" stop-opacity="0"/><stop offset="1" stop-color="${BG}"/></linearGradient>
+      <linearGradient id="t" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${BG}"/><stop offset="0.02" stop-color="${BG}" stop-opacity="0"/></linearGradient>
+      <linearGradient id="s" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${BG}"/><stop offset="0.04" stop-color="${BG}" stop-opacity="0"/><stop offset="0.96" stop-color="${BG}" stop-opacity="0"/><stop offset="1" stop-color="${BG}"/></linearGradient>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#b)"/><rect width="100%" height="100%" fill="url(#t)"/><rect width="100%" height="100%" fill="url(#s)"/>
+  </svg>`);
+  const faded = await sharp(path.join(out, "..", "images", "flyer.jpg")).resize(W, H).composite([{ input: fade }]).removeAlpha().toBuffer();
   // Nothing darker than the email's background, so the image has no visible edge against it.
-  const flat = await sharp(shot).resize(1200).removeAlpha().toBuffer({ resolveWithObject: true });
-  await sharp(flat.data)
-    .composite([{ input: { create: { width: flat.info.width, height: flat.info.height, channels: 3, background: BG } }, blend: "lighten" }])
-    .jpeg({ quality: 80, mozjpeg: true, chromaSubsampling: "4:4:4" })
-    .toFile(path.join(out, "poster.jpg"));
-  await page.close();
+  await sharp(faded)
+    .composite([{ input: { create: { width: W, height: H, channels: 3, background: BG } }, blend: "lighten" }])
+    .jpeg({ quality: 78, mozjpeg: true })
+    .toFile(path.join(out, "flyer.jpg"));
 }
 
 /* ---------- type: step numbers, the button and the tagline, in the site's Anton ---------- */
@@ -84,10 +72,6 @@ const browser = await chromium.launch();
   await draw(
     "save-the-date.png",
     `<div style="width:200px;height:52px;display:flex;align-items:center;justify-content:center;border-radius:6px;background:#55ff00;color:#0a0a06;font-size:18px;letter-spacing:.08em">SAVE THE DATE</div>`,
-  );
-  await draw(
-    "lagos-life.png",
-    `<div style="width:240px;height:40px;font-size:34px;line-height:40px;text-align:center;color:#55ff00;white-space:nowrap">THE LAGOS LIFE</div>`,
   );
   await draw(
     "tagline.png",
@@ -153,4 +137,4 @@ const browser = await chromium.launch();
 }
 
 await browser.close();
-console.log("Wrote poster.jpg, lagos-life.png, step-1..3.png, save-the-date.png, tagline.png, badge.png, stamp.png, stub.png and digit-0..9.png to public/email/");
+console.log("Wrote flyer.jpg, step-1..3.png, save-the-date.png, tagline.png, badge.png, stamp.png, stub.png and digit-0..9.png to public/email/");

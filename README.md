@@ -151,15 +151,16 @@ night), Brevo Automations can start when a contact is added to the list.
 ## Assets
 
 `public/email/` holds the confirmation email's images (PNG and JPG, since email apps don't show WebP or SVG). They're
-made from the site itself by `node scripts/email-assets.mjs` with `npm run dev` running: the poster, THE LAGOS LIFE,
-the step numbers, the Save the date button, the tagline, the flip tiles `digit-0.png` to `digit-9.png`, and the badge,
-stamp and stub that `/api/ticket` puts on each guest's ticket. `logo.png`, `owl.jpg` and `grain.png` are from earlier
-versions of the email; emails already sent still link to them, so keep them. The ticket's fonts (Anton and Bricolage
+made by `node scripts/email-assets.mjs` with `npm run dev` running: the event flyer (`flyer.jpg`, from
+`public/images/flyer.jpg` with its edges faded into the email's background), and, from the site itself, the step numbers, the Save the date button, the tagline, the flip tiles `digit-0.png` to `digit-9.png`, and the badge,
+stamp and stub that `/api/ticket` puts on each guest's ticket. `logo.png`, `owl.jpg`, `grain.png`, `poster.jpg` and `lagos-life.png`
+are from earlier versions of the email; emails already sent still link to them, so keep them. The ticket's fonts (Anton and Bricolage
 Grotesque, both under the SIL Open Font License) are in `assets/fonts/`.
 
 Everything in `public/images` except the photos was exported from the Figma file: hero background, logo, owl badge,
-strip owl, poster (now only the link-preview image), and the six flip-card shapes (`flip-1.svg` to `flip-6.svg`). The event
-flyer in the city section, `flyer.jpg`, is the flyer as supplied.
+strip owl, poster (no longer shown), and the six flip-card shapes (`flip-1.svg` to `flip-6.svg`). The event flyer,
+`flyer.jpg`, is the flyer as supplied; it's in the city section, and `flyer-share.jpg` is a lighter copy for link
+previews (`openGraph` in `src/app/layout.tsx`).
 
 Photos: `exp-sound.jpg`, `exp-people.jpg`, `exp-atmosphere.jpg` (Experience stage), `value-originality.jpg` (the
 bridge poster with its title, logo and carousel marks retouched out), `value-freedom.jpg` (app icons cropped off) and

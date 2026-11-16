@@ -3,19 +3,20 @@ import { EVENT_TIME } from "@/lib/event";
 import { ticketImageUrl } from "@/lib/ticketImage";
 
 /**
- * The waitlist confirmation email: the site's poster up top, the guest's green ticket, what to expect next,
+ * The waitlist confirmation email: the event flyer up top, the guest's green ticket, what to expect next,
  * and a countdown with a save-the-date link. Dark in every email app, including ones in dark mode.
  *
  * Why it's built the way it is: dark-mode email apps repaint an email's colours. Gmail on iPhone flips all
  * of them, turning a dark email light; images are left alone. So:
- *  - Everything coloured is an image: the poster, THE LAGOS LIFE, the ticket (drawn per guest by
- *    /api/ticket), the step numbers, the countdown tiles, the button and the tagline (public/email/, made
- *    by scripts/email-assets.mjs).
+ *  - Everything coloured is an image: the flyer, the ticket (drawn per guest by /api/ticket), the step
+ *    numbers, the countdown tiles, the button and the tagline (public/email/, made by
+ *    scripts/email-assets.mjs).
  *  - Dark backgrounds are also painted as a one-colour gradient, which counts as an image, so they stay dark.
  *  - Live text is white or grey, wrapped in two blend layers (`keep`) that cancel Gmail's flip: in an app
  *    that flips colours they flip the text back; anywhere else they change nothing.
  * Table layout and inline styles throughout, one 600px column that narrows on phones. Names, dates and
- * every line of copy stay live text, so the email still reads with images off.
+ * every line of copy stay live text (the flyer's own words are in its alt text), so the email still reads
+ * with images off.
  */
 
 const esc = (s: string) =>
@@ -172,16 +173,10 @@ export function confirmationEmail({
     <td align="center" bgcolor="${C.bg}" style="padding:0;${solid(C.bg)}">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;">
 
-        <!-- The poster: logo over the owl, as on the site -->
+        <!-- The event flyer. Its own words (date, venue, reservations) are in the alt text for images-off. -->
         <tr>
           <td align="center" style="padding:12px 0 0;">
-            <a href="${site}" style="text-decoration:none;"><img src="${img("poster.jpg")}" width="600" alt="NOCTVRNA" style="display:block;width:100%;max-width:600px;height:auto;border:0;font-family:${DISPLAY};font-size:56px;line-height:80px;text-align:center;color:${C.ink};"></a>
-          </td>
-        </tr>
-        <tr>
-          <td align="center" style="padding:0 24px;">
-            <img src="${img("lagos-life.png")}" width="240" height="40" alt="The Lagos Life" style="display:block;margin:0 auto;width:240px;height:40px;border:0;font-family:${DISPLAY};font-size:30px;line-height:40px;text-align:center;color:${C.ink};">
-            <div style="padding-top:6px;">${keep(p(`font-size:14px;line-height:20px;letter-spacing:1.6px;text-transform:uppercase;text-align:center;color:${C.ink};`, "Our day begins after dark"))}</div>
+            <a href="${site}" style="text-decoration:none;"><img src="${img("flyer.jpg")}" width="600" alt="NOCTVRNA: The Lagos Life. Our day begins after dark. Date: Dec 12th. Venue: Loud Lagos. For table reservations: 0816 866 9798." style="display:block;width:100%;max-width:600px;height:auto;border:0;font-family:${DISPLAY};font-size:28px;line-height:40px;text-align:center;color:${C.ink};"></a>
           </td>
         </tr>
 
