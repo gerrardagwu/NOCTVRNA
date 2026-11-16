@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRef } from "react";
 import { gsap, ScrollTrigger, SplitText, prefersReducedMotion, useGSAP } from "@/lib/gsap";
+import { whileInView } from "@/lib/inView";
 import { useFontsReady } from "@/lib/useFontsReady";
 import Blink, { OWL_EYES } from "./Blink";
 import Experience, { type ExperienceHandle } from "./Experience";
@@ -41,7 +42,9 @@ export default function Stack() {
 
       const headline = SplitText.create(q("[data-city-headline]"), { type: "words" });
       const layers = q("[data-vlayer]");
-      const glow = gsap.to(q("[data-glow]"), { scale: 1.12, opacity: 0.75, duration: 3.2, ease: "sine.inOut", repeat: -1, yoyo: true });
+      // The sign-up's glow breathes (a CSS animation) only while the section is on screen.
+      const glowEl = q("[data-glow]")[0] as HTMLElement;
+      const stopGlow = whileInView(enter, (visible) => glowEl.toggleAttribute("data-live", visible));
 
       // The Experience scene rises into view while the manifesto sinks away behind it.
       gsap
@@ -185,7 +188,8 @@ export default function Stack() {
         city.removeEventListener("pointermove", onCityMove);
         city.removeEventListener("pointerleave", onCityLeave);
         mm.revert();
-        glow.kill();
+        stopGlow();
+        glowEl.removeAttribute("data-live");
         headline.revert();
       };
     },

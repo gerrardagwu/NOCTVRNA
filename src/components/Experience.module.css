@@ -66,10 +66,11 @@
   color: rgb(237 193 252 / 0.5);
 }
 
-/* Letters ripple up one after another when you land on a word. */
+/* Letters ripple up one after another when you land on a word. No fill: the animation starts and ends on
+   the letter's own resting state, and holding it afterwards would keep every letter on a GPU layer. */
 .tab:hover .ch,
 .tab[aria-selected="true"] .ch {
-  animation: hop 0.55s var(--ease-out) both;
+  animation: hop 0.55s var(--ease-out);
   animation-delay: calc(var(--i) * 28ms);
 }
 
@@ -96,7 +97,9 @@
   line-height: 1.45;
   letter-spacing: -0.02em;
   color: var(--ink);
-  animation: rise 0.6s var(--ease-out) both;
+  /* Backwards fill only: the start state applies at once, and when it's done the line goes back to plain
+     text instead of being held on a GPU layer. */
+  animation: rise 0.6s var(--ease-out) backwards;
 }
 
 @keyframes rise {

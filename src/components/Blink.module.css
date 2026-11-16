@@ -28,9 +28,9 @@
 }
 
 .left {
-  background-image: url("/images/lid-left.png");
+  background-image: url("/images/lid-left.webp");
 }
 
 .right {
-  background-image: url("/images/lid-right.png");
+  background-image: url("/images/lid-right.webp");
 }

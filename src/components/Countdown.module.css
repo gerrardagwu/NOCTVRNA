@@ -32,7 +32,6 @@
   display: block;
   width: calc(60 * var(--cu));
   height: calc(70 * var(--cu));
-  perspective: calc(260 * var(--cu));
 }
 
 .half {
@@ -60,18 +59,16 @@
   clip-path: inset(50% 0 0 0);
 }
 
+/*
+  The moving flap is two faces turned one after the other about the hinge (each half is the full card, so
+  its centre is the hinge): the front folds up to edge-on, then the back folds down from edge-on. That's
+  the same motion as one flap turning over, without a 3D scene: no layers for the cards at rest, and only
+  the face that's moving is layered while it moves. FlipDigit adds the perspective as it turns.
+*/
 .flap {
   position: absolute;
   inset: 0;
   display: block;
-  transform-style: preserve-3d;
-  transform-origin: 50% 50%;
-}
-
-.front,
-.back {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
 }
 
 .front {
@@ -80,7 +77,7 @@
 
 .back {
   clip-path: inset(0 0 50% 0);
-  transform: rotateX(180deg);
+  visibility: hidden;
 }
 
 .shade {

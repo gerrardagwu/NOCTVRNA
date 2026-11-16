@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRef } from "react";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/gsap";
+import { whileInView } from "@/lib/inView";
 import s from "./Strip.module.css";
 import { STRIP_WORDS } from "./stripWords";
 
@@ -29,8 +30,13 @@ export default function Strip() {
       const ro = new ResizeObserver(() => (width = set.offsetWidth));
       ro.observe(set);
 
+      // Scroll position from scroll events, not read inside the frame loop (a read there can force the
+      // browser to recompute styles mid-frame).
+      let y = lastY;
+      const onScroll = () => (y = window.scrollY);
+      window.addEventListener("scroll", onScroll, { passive: true });
+
       const tick = (_time: number, deltaMs: number) => {
-        const y = window.scrollY;
         const dy = y - lastY;
         lastY = y;
         if (dy !== 0) dir = dy > 0 ? 1 : -1;
@@ -41,9 +47,23 @@ export default function Strip() {
         track.style.transform = `translate3d(${x}px, 0, 0)`;
       };
 
-      gsap.ticker.add(tick);
+      // Only drift while the strip is on screen (no head start: its position doesn't depend on time).
+      const stopWatching = whileInView(
+        root.current!,
+        (visible) => {
+          if (visible) {
+            lastY = y;
+            gsap.ticker.add(tick);
+          } else {
+            gsap.ticker.remove(tick);
+          }
+        },
+        "0px",
+      );
       return () => {
+        stopWatching();
         gsap.ticker.remove(tick);
+        window.removeEventListener("scroll", onScroll);
         ro.disconnect();
       };
     },

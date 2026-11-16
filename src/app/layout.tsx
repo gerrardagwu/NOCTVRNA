@@ -1,16 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Anton, Bricolage_Grotesque, DM_Sans, Metal_Mania } from "next/font/google";
+import Script from "next/script";
+import { Anton, Bricolage_Grotesque, DM_Sans } from "next/font/google";
 import "lenis/dist/lenis.css";
 import "./globals.css";
+import { LOW_TIER_SCRIPT } from "@/lib/perfTierScript";
 
 const anton = Anton({ weight: "400", subsets: ["latin"], variable: "--font-anton", display: "swap" });
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm", display: "swap" });
 
-// The design uses Bunch (body) and NEUVORTE (the "THE NIGHT IS CALLING" lettering). Neither is on
-// Google Fonts, so these are stand-ins. To use the real faces, drop the files into src/fonts and
-// swap these two calls for next/font/local with the same `variable` names. See README.
+// The design's body face is Bunch, which isn't on Google Fonts, so this is a stand-in. To use the real
+// face, drop the files into src/fonts and swap this call for next/font/local with the same `variable`
+// name. See README.
 const bunch = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-bunch", display: "swap" });
-const neuvorte = Metal_Mania({ weight: "400", subsets: ["latin"], variable: "--font-neuvorte", display: "swap" });
 
 export const metadata: Metadata = {
   title: "NOCTVRNA | The Lagos Life",
@@ -30,8 +31,10 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${anton.variable} ${dmSans.variable} ${bunch.variable} ${neuvorte.variable}`}>
+    // suppressHydrationWarning: the perf-tier script may add data-perf to <html> before React hydrates.
+    <html lang="en" className={`${anton.variable} ${dmSans.variable} ${bunch.variable}`} suppressHydrationWarning>
       <body>
+        <Script id="perf-tier" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: LOW_TIER_SCRIPT }} />
         <noscript>
           <style>{`[data-intro]{opacity:1!important}`}</style>
         </noscript>

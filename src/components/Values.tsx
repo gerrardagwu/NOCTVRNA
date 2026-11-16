@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/gsap";
+import { whileInView } from "@/lib/inView";
 import Blink, { OWL_EYES } from "./Blink";
 import s from "./Values.module.css";
 
@@ -116,8 +117,25 @@ export default function Values() {
         const pan = layer.querySelector<HTMLElement>("[data-vpan]");
         const px = pan && gsap.quickTo(pan, "x", { duration: 1.2, ease: "power3.out" });
         const py = pan && gsap.quickTo(pan, "y", { duration: 1.2, ease: "power3.out" });
+        // The ring turns once every 16s as a browser animation, which the compositor plays on its own thread
+        // (no work per frame for the page), and only while its card is on screen. Off screen the animation is
+        // dropped (freeing its GPU layer) and picks up from the same angle when the card comes back.
         const ring = layer.querySelector<HTMLElement>("[data-ring]")!;
-        const spin = gsap.to(ring, { rotation: 360, duration: 16, ease: "none", repeat: -1 });
+        let spin: Animation | null = null;
+        let at = 0;
+        const rate = { value: 1 };
+        const show = () => {
+          spin = ring.animate([{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }], { duration: 16000, iterations: Infinity });
+          spin.currentTime = at;
+          spin.playbackRate = rate.value;
+        };
+        const hide = () => {
+          at = Number(spin?.currentTime ?? at);
+          spin?.cancel();
+          spin = null;
+        };
+        const setRate = (value: number, duration: number) =>
+          gsap.to(rate, { value, duration, ease: "power2.out", overwrite: true, onUpdate: () => spin?.updatePlaybackRate(rate.value) });
         const mx = gsap.quickTo(sticker, "x", { duration: 0.9, ease: "power3.out" });
         const my = gsap.quickTo(sticker, "y", { duration: 0.9, ease: "power3.out" });
 
@@ -137,14 +155,17 @@ export default function Values() {
           px?.(0);
           py?.(0);
         };
-        const faster = () => gsap.to(spin, { timeScale: 5, duration: 0.6, ease: "power2.out" });
-        const slower = () => gsap.to(spin, { timeScale: 1, duration: 1.2, ease: "power2.out" });
+        const faster = () => setRate(5, 0.6);
+        const slower = () => setRate(1, 1.2);
+        const stopWatching = whileInView(layer, (visible) => (visible ? show() : hide()), "0px");
 
         layer.addEventListener("pointermove", onMove);
         layer.addEventListener("pointerleave", onLeave);
         sticker.addEventListener("pointerenter", faster);
         sticker.addEventListener("pointerleave", slower);
         cleanups.push(() => {
+          stopWatching();
+          hide();
           layer.removeEventListener("pointermove", onMove);
           layer.removeEventListener("pointerleave", onLeave);
           sticker.removeEventListener("pointerenter", faster);
@@ -263,7 +284,10 @@ export default function Values() {
 
                   <div className={s.sticker} data-sticker aria-hidden="true">
                     <div className={s.stickerIn} data-vsticker>
-                      <svg className={s.ring} data-ring viewBox="0 0 200 200">
+                      {/* The spin turns this wrapper, not the SVG: turning the SVG itself re-lays out its
+                          curved text every frame. */}
+                      <span className={s.ringSpin} data-ring>
+                      <svg className={s.ring} viewBox="0 0 200 200">
                         <defs>
                           <path id={`ring-${i}`} d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0" />
                         </defs>
@@ -273,6 +297,7 @@ export default function Values() {
                           </textPath>
                         </text>
                       </svg>
+                      </span>
                       <span className={s.owl}>
                         <Image src="/images/owl-badge.png" alt="" width={88} height={88} />
                         <Blink eyes={OWL_EYES.badge} />

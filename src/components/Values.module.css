@@ -280,6 +280,12 @@
   cursor: pointer;
 }
 
+.ringSpin {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
 .ring {
   position: absolute;
   inset: 0;

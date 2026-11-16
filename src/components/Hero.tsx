@@ -19,6 +19,9 @@ const HEADER = {
   mobile: { height: 60, pad: 16, logo: 22, card: 18, tabX: 8, tabY: 7, timerInBar: false },
 };
 
+/** GSAP's sine.inOut as a CSS easing, for animations the browser runs itself. */
+const SINE_IN_OUT = "cubic-bezier(0.37, 0, 0.63, 1)";
+
 /** Layout rect of an element with any GSAP transform taken off, so header targets stay correct after resize. */
 function untransformed(el: HTMLElement) {
   const t = el.style.transform;
@@ -126,6 +129,17 @@ export default function Hero({ play }: { play: boolean }) {
         return;
       }
 
+      // Once lit, the logo keeps a faint hum: a browser animation of the glow's opacity, which the compositor
+      // plays on its own thread, so it costs the page nothing per frame and never competes with scrolling.
+      // (Driven by GSAP it restyled and repainted the blurred glow every frame for as long as the page was open.)
+      let hum: Animation | null = null;
+      const startHum = () => {
+        const glow = q("[data-glow-img]")[0] as HTMLElement | undefined;
+        gsap.set(logoInner, { "--g": 0.55 });
+        (logoInner[0] as HTMLElement).dataset.lit = "";
+        return glow?.animate([{ opacity: 0.55 }, { opacity: 0.8 }], { duration: 2600, iterations: Infinity, direction: "alternate", easing: SINE_IN_OUT }) ?? null;
+      };
+
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
       tl.to(q("[data-bg-inner]"), { opacity: 1, scale: 1, duration: 2.6, ease: "power2.out" }, 0.2)
         .fromTo(logoInner, { scale: 0.965 }, { scale: 1, duration: 2.2, ease: "power2.out" }, 0.25)
@@ -163,14 +177,16 @@ export default function Hero({ play }: { play: boolean }) {
         .set(q("[data-cd-pair]"), { opacity: 1 }, 2.0)
         .from(
           q("[data-card]"),
-          { rotateX: -100, opacity: 0, transformPerspective: 400, transformOrigin: "50% 0%", duration: 0.9, stagger: 0.06, ease: "expo.out" },
+          // clearProps: once in, the cards carry no transform (a leftover perspective() would keep each on its own layer).
+          { rotateX: -100, opacity: 0, transformPerspective: 400, transformOrigin: "50% 0%", duration: 0.9, stagger: 0.06, ease: "expo.out", clearProps: "transform,transformOrigin" },
           2.0,
         )
         .fromTo(q("[data-cd-label] [data-intro]"), { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.6, stagger: 0.08 }, 2.35)
         .call(() => countdown.current?.start(true), [], 2.45)
         .fromTo(q("[data-ticket]"), { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.8 }, 2.5)
-        // Once lit, the tube keeps a faint hum.
-        .to(logoInner, { "--g": 0.8, duration: 2.6, ease: "sine.inOut", repeat: -1, yoyo: true }, ">");
+        .call(() => (hum = startHum()), [], ">");
+
+      return () => hum?.cancel();
     },
     { scope: root, dependencies: [play] },
   );
@@ -204,13 +220,13 @@ export default function Hero({ play }: { play: boolean }) {
           <div className={s.owl} data-owl data-fade>
             <div data-intro className={s.owlInner}>
               <Image src="/images/hero-owl.webp" alt="" fill sizes="(max-width: 760px) 112vw, 1000px" priority quality={85} />
-              <Blink eyes={OWL_EYES.face} />
+              <Blink eyes={OWL_EYES.face} watch="[data-hero]" />
             </div>
           </div>
 
           <a href="#top" className={s.logo} data-logo onClick={onLogo} aria-label="NOCTVRNA, back to top">
             <span className={s.logoInner} data-logo-inner>
-              <Image className={s.glow} src="/images/logo.png" alt="" fill sizes="(max-width: 760px) 92vw, 931px" priority />
+              <Image className={s.glow} data-glow-img src="/images/logo.png" alt="" fill sizes="(max-width: 760px) 92vw, 931px" priority />
               <Image className={s.logoImg} src="/images/logo.png" alt="NOCTVRNA" fill sizes="(max-width: 760px) 92vw, 931px" priority />
             </span>
           </a>

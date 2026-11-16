@@ -35,6 +35,14 @@
   visibility: hidden;
 }
 
+/* Low-powered devices (perfTier.ts): the frosted glass is re-rendered every frame while the page scrolls
+   under it, the costliest thing on the GPU here. A denser tint of the same colour reads almost the same. */
+:global(html[data-perf="low"]) .bar,
+:global(html[data-perf="low"]) .cdTab {
+  background: rgb(5 4 6 / 0.95);
+  backdrop-filter: none;
+}
+
 /* Mobile: the countdown's tab, hanging just below the header on the right. Sized from JS to the timer. */
 .cdTab {
   position: absolute;
@@ -212,12 +220,20 @@
   filter: brightness(var(--b));
 }
 
-/* The same artwork, blurred, is the light the letters throw. */
+/* Fully lit after the intro: brightness(1) is a no-op, so drop the filter altogether. */
+.logoInner[data-lit] .logoImg {
+  filter: none;
+}
+
+/* The same artwork, blurred, is the light the letters throw. Its opacity animates for the life of the page
+   (the intro's flicker, then the hum), so it gets a layer of its own: the blur is drawn once and only its
+   opacity changes, instead of the blur being redrawn every frame. */
 .glow {
   object-fit: contain;
   filter: blur(calc(34 * var(--u))) saturate(1.5);
   opacity: var(--g);
   transform: scale(1.03);
+  will-change: opacity;
 }
 
 .caption {

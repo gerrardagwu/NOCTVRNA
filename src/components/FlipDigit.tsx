@@ -17,13 +17,25 @@ type Step = { value: number; duration: number; cascade: boolean };
  * One split-flap card. The card art is the Figma "Subtract" shape; each half is the same full card
  * clipped to the top or bottom, so the digit lines up across the hinge. A change lifts the bottom
  * flap up and over: its front shows the old digit's lower half, its back the new digit's upper half.
+ * The two faces turn in sequence (front 0° to 90°, then back -90° to 0°, the two halves of one eased
+ * turn), which looks the same as a flap turning over but needs no 3D scene (see Countdown.module.css).
  */
+
+/** The card's perspective, as in the design: 260 units for a 70 unit tall card. */
+const PERSPECTIVE = 260 / 70;
+
+const resetFaces = (front: HTMLElement | null, back: HTMLElement | null, shades: (HTMLElement | null)[]) => {
+  gsap.set([front, back], { clearProps: "transform,visibility" });
+  gsap.set(shades, { opacity: 0 });
+};
 export default function FlipDigit({ ref, art }: { ref?: Ref<FlipDigitHandle>; art: string }) {
   const top = useRef<HTMLSpanElement>(null);
   const bottom = useRef<HTMLSpanElement>(null);
   const front = useRef<HTMLSpanElement>(null);
   const back = useRef<HTMLSpanElement>(null);
   const flap = useRef<HTMLSpanElement>(null);
+  const frontFace = useRef<HTMLSpanElement>(null);
+  const backFace = useRef<HTMLSpanElement>(null);
   const frontShade = useRef<HTMLElement>(null);
   const backShade = useRef<HTMLElement>(null);
 
@@ -56,21 +68,32 @@ export default function FlipDigit({ ref, art }: { ref?: Ref<FlipDigitHandle>; ar
         write(bottom.current, to);
         write(back.current, to);
 
+        // One eased turn split at the hinge: power3.inOut is power3.in for its first half, power3.out for its second.
+        const half = d / 2;
+        const linear = d < 0.2;
+        const persp = (flap.current?.offsetHeight ?? 70) * PERSPECTIVE;
         running.current = gsap
           .timeline({
             onComplete: () => {
               shown.current = to;
               write(top.current, to);
               write(front.current, to);
-              gsap.set(flap.current, { rotateX: 0 });
-              gsap.set([frontShade.current, backShade.current], { opacity: 0 });
+              resetFaces(frontFace.current, backFace.current, [frontShade.current, backShade.current]);
               running.current = null;
               next();
             },
           })
-          .fromTo(flap.current, { rotateX: 0 }, { rotateX: 180, duration: d, ease: d < 0.2 ? "none" : "power3.inOut" })
-          .fromTo(frontShade.current, { opacity: 0 }, { opacity: 0.55, duration: d / 2, ease: "none" }, 0)
-          .fromTo(backShade.current, { opacity: 0.55 }, { opacity: 0, duration: d / 2, ease: "none" }, d / 2);
+          .fromTo(frontFace.current, { rotateX: 0, transformPerspective: persp }, { rotateX: 90, duration: half, ease: linear ? "none" : "power3.in" })
+          .fromTo(frontShade.current, { opacity: 0 }, { opacity: 0.55, duration: half, ease: "none" }, 0)
+          .set(frontFace.current, { visibility: "hidden" }, half)
+          .set(backFace.current, { visibility: "visible" }, half)
+          .fromTo(
+            backFace.current,
+            { rotateX: -90, transformPerspective: persp },
+            { rotateX: 0, duration: half, ease: linear ? "none" : "power3.out", immediateRender: false },
+            half,
+          )
+          .fromTo(backShade.current, { opacity: 0.55 }, { opacity: 0, duration: half, ease: "none" }, half);
       };
 
       const snap = (n: number) => {
@@ -80,8 +103,7 @@ export default function FlipDigit({ ref, art }: { ref?: Ref<FlipDigitHandle>; ar
         busy.current = false;
         shown.current = target.current = n;
         [top, bottom, front, back].forEach((r) => write(r.current, n));
-        gsap.set(flap.current, { rotateX: 0 });
-        gsap.set([frontShade.current, backShade.current], { opacity: 0 });
+        resetFaces(frontFace.current, backFace.current, [frontShade.current, backShade.current]);
       };
 
       return {
@@ -127,11 +149,11 @@ export default function FlipDigit({ ref, art }: { ref?: Ref<FlipDigitHandle>; ar
         <span ref={bottom}>0</span>
       </span>
       <span className={s.flap} ref={flap}>
-        <span className={`${s.half} ${s.front}`} style={face}>
+        <span className={`${s.half} ${s.front}`} style={face} ref={frontFace}>
           <span ref={front}>0</span>
           <i className={s.shade} ref={frontShade} style={{ maskImage: `url(${art})`, WebkitMaskImage: `url(${art})` }} />
         </span>
-        <span className={`${s.half} ${s.back}`} style={face}>
+        <span className={`${s.half} ${s.back}`} style={face} ref={backFace}>
           <span ref={back}>0</span>
           <i className={s.shade} ref={backShade} style={{ maskImage: `url(${art})`, WebkitMaskImage: `url(${art})` }} />
         </span>

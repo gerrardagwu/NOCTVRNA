@@ -23,7 +23,7 @@ npm run build && npm start
 | Hero | Full screen, straight away (there's no preloader). As soon as the fonts are in, the NOCTVRNA logo switches on like a tube light catching (flicker, then a steady glow with a faint hum), and the city lights up behind it. | `src/components/Hero.tsx` |
 | Countdown | Live split-flap countdown to 12 December 2026 (days, hours, minutes, seconds). The cards swing open, cascade through the digits like a calendar, then every tick lifts the bottom flap up and over. Each tick is scheduled for the moment the second changes and read fresh from the clock, which is corrected against the server's time (`/api/time`), so a phone set to the wrong time still counts down correctly. Coming back to a background tab jumps straight to the right time. | `src/components/FlipDigit.tsx`, `Countdown.tsx`, `src/lib/clock.ts` |
 | Header | As the hero scrolls away, the logo shrinks into a sticky, translucent header on the left, with the Get Access ticket on the right (it scrolls to the sign-up). The countdown shrinks into the middle of the header on desktop, and into a small tab just below the header on mobile. The owl stays in the hero and fades with it. Clicking anywhere else in the header scrolls back to the top. | `src/components/Hero.tsx`, `src/lib/scrollTo.ts` |
-| Blinking owl | The owl's own eyelid skin (cut from the teaser video's blink, `lid-left.png` / `lid-right.png`) slides down over each eye every few seconds, sometimes twice: hero, poster, values stickers and the sign-up ticket. Eye positions are in `OWL_EYES`. | `src/components/Blink.tsx` |
+| Blinking owl | The owl's own eyelid skin (cut from the teaser video's blink, `lid-left.png` / `lid-right.png`, served as the much lighter `.webp` copies) slides down over each eye every few seconds, sometimes twice: hero, poster, values stickers and the sign-up ticket. Eye positions are in `OWL_EYES`. | `src/components/Blink.tsx` |
 | Purple strip | Endless marquee. It always drifts, speeds up when you scroll and reverses when you scroll up. The words are Bunch Bold outlines exported from the Figma strip, so they match the design before the font is installed. | `src/components/Strip.tsx`, `stripWords.ts` |
 | Beyond the ordinary | The heading stays put while the copy scrolls past; when the copy runs out they leave together. The lead paragraph lights up word by word. | `src/components/Manifesto.tsx` |
 | Sound / People / Atmosphere | Full-screen scene. Scroll (or hover/tap a word) to change the photo: it fades up with a slow push-in and drifts gently against the cursor. | `src/components/Experience.tsx` |
@@ -39,11 +39,32 @@ while it swaps its contents (`VALUE_REST` sets how long each value rests); the s
 
 All motion respects `prefers-reduced-motion`.
 
+## Performance (low-end phones)
+
+Profiled as a budget Android phone (360×760 at 2x, CPU slowed 4x, real touch flicks). The rules the code follows:
+
+- **Endless loops cost nothing per frame.** The logo's hum, the sign-up glow and the values rings are browser
+  animations of transform or opacity, which the compositor plays on its own thread. Driven by GSAP they restyled,
+  repainted (the glow repainted the whole 6,500px values-and-sign-up block) or re-laid out text (the rings' curved
+  text) on every frame, for the life of the page.
+- **Nothing animates off screen.** The strip, the rings, the glow and every blinking owl run only while visible
+  (`whileInView` in `src/lib/inView.ts`); off screen their layers are released, and they resume where they left off.
+- **Few GPU layers.** The countdown flips two faces in turn instead of building a 3D scene per card, and finished
+  CSS animations don't hold their end state, which took the page from about 70 layers to about 20.
+- **Adaptive quality** (`src/lib/perfTier.ts`). On a low-powered device (an Android phone with 2 GB of memory or
+  less, 4 or fewer cores or Data Saver on, or any device whose frame rate measures poor during the intro or the
+  first scroll) the header's and the sign-up ticket's frosted glass becomes a denser tint of the same colour (the
+  blur is redrawn every frame while content moves under it, the costliest thing on the GPU here), and wheel
+  scrolling is left to the browser. Every animation stays. Add `?perf=low` or `?perf=high` to the address to see
+  either tier.
+- Static effects (the large soft shadows, the ticket's drop shadow, the owl's feathered mask) measured free while
+  scrolling: they're drawn once and reused, so they stay.
+
 ## Before launch
 
-1. **Fonts.** The design uses **Bunch** and **NEUVORTE**, which aren't on Google Fonts. The site currently uses
-   Bricolage Grotesque and Metal Mania as stand-ins. To switch, put the font files in `src/fonts/` and replace the two
-   calls in `src/app/layout.tsx` with `next/font/local`, keeping the same variable names:
+1. **Fonts.** The design's body face is **Bunch**, which isn't on Google Fonts. The site currently uses Bricolage
+   Grotesque as a stand-in. To switch, put the font files in `src/fonts/` and replace that call in
+   `src/app/layout.tsx` with `next/font/local`, keeping the same variable name:
 
    ```ts
    import localFont from "next/font/local";
@@ -54,7 +75,6 @@ All motion respects `prefers-reduced-motion`.
      ],
      variable: "--font-bunch",
    });
-   const neuvorte = localFont({ src: "../fonts/Neuvorte-Regular.woff2", variable: "--font-neuvorte" });
    ```
 
 2. **Waitlist.** Connected to Brevo; see [Waitlist and email (Brevo)](#waitlist-and-email-brevo) for the settings it

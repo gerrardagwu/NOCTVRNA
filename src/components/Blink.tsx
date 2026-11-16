@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/gsap";
+import { whileInView } from "@/lib/inView";
 import s from "./Blink.module.css";
 
 /** Eye centre and size, in percent of the owl artwork's own box. Measured from the green of each iris. */
@@ -25,9 +26,11 @@ export const OWL_EYES = {
 
 /**
  * Eyelids laid over an owl image. Place inside a positioned box the same size as the artwork.
- * Blinks every few seconds, now and then twice in a row, for as long as it's on the page.
+ * Blinks every few seconds, now and then twice in a row, while it's on screen. `watch` is a selector for
+ * the element whose visibility counts, for an owl that sits in a fixed layer (the hero's) rather than
+ * scrolling with its section.
  */
-export default function Blink({ eyes, className }: { eyes: Eye[]; className?: string }) {
+export default function Blink({ eyes, className, watch }: { eyes: Eye[]; className?: string; watch?: string }) {
   const root = useRef<HTMLSpanElement>(null);
 
   useGSAP(
@@ -35,8 +38,10 @@ export default function Blink({ eyes, className }: { eyes: Eye[]; className?: st
       if (prefersReducedMotion()) return;
       const lids = root.current!.querySelectorAll(`.${s.eye}`);
       let next: gsap.core.Tween | null = null;
+      let visible = false;
 
       const blink = () => {
+        if (!visible) return;
         const tl = gsap.timeline({ onComplete: schedule });
         const times = Math.random() < 0.22 ? 2 : 1;
         for (let i = 0; i < times; i++) {
@@ -50,13 +55,21 @@ export default function Blink({ eyes, className }: { eyes: Eye[]; className?: st
         }
       };
       const schedule = () => {
-        next = gsap.delayedCall(2.4 + Math.random() * 3.6, blink);
+        if (visible) next = gsap.delayedCall(2.4 + Math.random() * 3.6, blink);
       };
 
-      next = gsap.delayedCall(0.6 + Math.random() * 2, blink);
-      return () => next?.kill();
+      const target = (watch && document.querySelector(watch)) || root.current!;
+      const stopWatching = whileInView(target, (v) => {
+        visible = v;
+        next?.kill();
+        if (v) next = gsap.delayedCall(0.6 + Math.random() * 2, blink);
+      });
+      return () => {
+        stopWatching();
+        next?.kill();
+      };
     },
-    { scope: root },
+    { scope: root, dependencies: [watch] },
   );
 
   return (

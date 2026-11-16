@@ -192,6 +192,21 @@
   pointer-events: none;
 }
 
+/* It breathes (GSAP's sine.inOut, as a CSS curve) while the section is on screen (data-live). A CSS animation
+   of transform and opacity runs on the compositor: the blurred circle is drawn once and only moved, instead
+   of being repainted every frame along with the whole tall stage around it. Off screen the animation is
+   removed, freeing its layer; it starts from the resting state, so coming back never jumps. */
+.glow[data-live] {
+  animation: glow-breathe 3.2s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate;
+}
+
+@keyframes glow-breathe {
+  to {
+    transform: scale(1.12);
+    opacity: 0.75;
+  }
+}
+
 .enterInner {
   --u: min(calc(100vw / 1440), calc(100svh / 951));
   position: absolute;
@@ -476,6 +491,10 @@
   .spinner {
     animation-duration: 2.4s;
   }
+
+  .glow {
+    animation: none;
+  }
 }
 
 /* ---------- The ticket you get for signing up ---------- */
@@ -512,6 +531,15 @@
     radial-gradient(60% 50% at 50% 50%, rgb(85 255 0 / 0.12), transparent 70%),
     rgb(5 4 6 / 0.82);
   backdrop-filter: blur(10px);
+}
+
+/* Low-powered devices (perfTier.ts): the full-screen blur would be redrawn every frame of the ticket's
+   entrance. The same scrim, a touch denser, keeps the page sunk back behind it. */
+:global(html[data-perf="low"]) .dialogScrim {
+  background:
+    radial-gradient(60% 50% at 50% 50%, rgb(85 255 0 / 0.12), transparent 70%),
+    rgb(5 4 6 / 0.9);
+  backdrop-filter: none;
 }
 
 .dialogBody {
